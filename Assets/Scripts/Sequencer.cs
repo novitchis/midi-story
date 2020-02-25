@@ -10,6 +10,8 @@ public class Sequencer : MonoBehaviour
     public GameObject whiteTile;
 
     public float width;
+    public float quarterNoteLength;
+    public float speedMultiplier;
 
     public TextAsset sourceFile;
     MidiFileContainer song;
@@ -17,13 +19,28 @@ public class Sequencer : MonoBehaviour
 
     private int[] octaveBlackKeysIndexes = new int[] { 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0 };
     private int[] octaveBlackKeys = new int[] { 0, 0, 1, 1, 2, 2, 2, 3, 3, 4, 4, 5 };
-    private string[] notes = new string[] { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
+    private string[] notesNames = new string[] { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
+
+    private GameObject[] notesObjects = new GameObject[108];
+
+    private int bpm = 80; 
 
     void ResetAndPlay()
     {
         transform.position = new Vector3(-9, 2, 0);
+
+        //int index = 0;
+        //foreach (GameObject noteObject in notesObjects)
+        //{
+        //    if (noteObject != null)
+        //    {
+        //        Destroy(noteObject);
+        //        notesObjects[index++] = null;
+        //    }
+        //}
+
         //TODO: get bpm from the midi file header
-        sequencer = new MidiTrackSequencer(song.tracks[0], song.division, 80.0f);
+        sequencer = new MidiTrackSequencer(song.tracks[0], song.division, bpm);
         ApplyMessages(sequencer.Start());
     }
 
@@ -37,7 +54,23 @@ public class Sequencer : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        transform.Translate(Vector3.forward * Time.deltaTime * -1f);
+        // is the amount would move per second if we the display can fit 60 seconds at once
+        // in our case we want to display about 4 seconds at a time, in this case the fall
+        // should be increased
+        float pointsPerSecond = (bpm / 60) * quarterNoteLength;
+
+        float pointsDown = pointsPerSecond * Time.deltaTime * speedMultiplier;
+
+        transform.Translate(Vector3.back * pointsDown);
+
+        foreach (GameObject noteObject in notesObjects)
+        {
+            if (noteObject != null)
+            {
+                noteObject.transform.localScale += Vector3.forward * pointsDown;
+                noteObject.transform.Translate(Vector3.forward * pointsDown / 2);
+            }
+        }
 
         if (sequencer != null && sequencer.Playing)
         {
@@ -57,9 +90,10 @@ public class Sequencer : MonoBehaviour
                     if (m.data1 < 21 || m.data1 > 108)
                         continue;
 
-
                     int octaveOffset = m.data1 % 12;
-                    Instantiate(
+                    Debug.Log("Note On: " + notesNames[octaveOffset]);
+
+                    notesObjects[m.data1] = Instantiate(
                         octaveBlackKeysIndexes[octaveOffset] == 1 ? blackTile : whiteTile,
                         GetNotePosition(m.data1), 
                         transform.rotation, 
@@ -68,8 +102,10 @@ public class Sequencer : MonoBehaviour
                 }
                 else if ((m.status & 0xf0) == 0x80)
                 {
+                    notesObjects[m.data1] = null;
+
                     int octaveOffset = (int)m.data1 % 12;
-                    Debug.Log("Note Off: " + notes[octaveOffset]);
+                    Debug.Log("Note Off: " + notesNames[octaveOffset]);
                 }
             }
         }
