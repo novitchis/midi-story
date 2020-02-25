@@ -15,6 +15,7 @@ public class Sequencer : MonoBehaviour
     MidiFileContainer song;
     MidiTrackSequencer sequencer;
 
+    private int[] octaveBlackKeysIndexes = new int[] { 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0 };
     private int[] octaveBlackKeys = new int[] { 0, 0, 1, 1, 2, 2, 2, 3, 3, 4, 4, 5 };
     private string[] notes = new string[] { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
 
@@ -52,13 +53,14 @@ public class Sequencer : MonoBehaviour
             {
                 if ((m.status & 0xf0) == 0x90)
                 {
+                    // the range of keys visible on keyboard is: 21 - 108
+                    if (m.data1 < 21 || m.data1 > 108)
+                        continue;
 
-                    int offset = (int)m.data1 % 12;
-                    //if (m.data2 != 0)
-                    //    Debug.Log((m.data2 == 0x0 ? "Note Off " : "Note On: ") + notes[offset]);// + " " + m.ToString());
 
+                    int octaveOffset = m.data1 % 12;
                     Instantiate(
-                        notes[offset].EndsWith("#") ? blackTile : whiteTile,
+                        octaveBlackKeysIndexes[octaveOffset] == 1 ? blackTile : whiteTile,
                         GetNotePosition(m.data1), 
                         transform.rotation, 
                         transform
@@ -66,25 +68,30 @@ public class Sequencer : MonoBehaviour
                 }
                 else if ((m.status & 0xf0) == 0x80)
                 {
-                    int offset = (int)m.data1 % 12;
-                    Debug.Log("Note Off: " + notes[offset]);// + " " + m.ToString());
+                    int octaveOffset = (int)m.data1 % 12;
+                    Debug.Log("Note Off: " + notes[octaveOffset]);
                 }
-                //else
-                //    Debug.Log("Unknown " + m.ToString());
             }
         }
     }
 
     private Vector3 GetNotePosition(byte note)
     {
-        // TODO: our range is: 21 - 108 - discard notes above and under
         int precedingBlackKeys = (note / 12) * 5 + octaveBlackKeys[note % 12];
+        
         // 12 is the white keys count not visible on the piano on bottom
         int precedingWhiteKeys = note - precedingBlackKeys - 12;
         int totalWhiteKeys = 51;
 
-        //TODO: black keys need an offset
-        return new Vector3(transform.position.x + (width / totalWhiteKeys) * precedingWhiteKeys, 1, 0);
+        float whiteKeyWidth = width / totalWhiteKeys;
+        float offsetX = whiteKeyWidth * precedingWhiteKeys;
+
+        //black keys need an offset
+        if (octaveBlackKeysIndexes[note % 12] == 1)
+            offsetX -= whiteKeyWidth / 2;
+
+        
+        return new Vector3(transform.position.x + offsetX, 1, 0);
     }
 
     void OnGUI()
