@@ -21,7 +21,8 @@ public class Sequencer : MonoBehaviour
     private int[] octaveBlackKeys = new int[] { 0, 0, 1, 1, 2, 2, 2, 3, 3, 4, 4, 5 };
     private string[] notesNames = new string[] { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
 
-    private GameObject[] notesObjects = new GameObject[108];
+    private GameObject[] playingNotes = new GameObject[108];
+    private List<GameObject> finishedNotes = new List<GameObject>();
 
     private int bpm = 80; 
 
@@ -29,15 +30,17 @@ public class Sequencer : MonoBehaviour
     {
         transform.position = new Vector3(-9, 2, 0);
 
-        //int index = 0;
-        //foreach (GameObject noteObject in notesObjects)
-        //{
-        //    if (noteObject != null)
-        //    {
-        //        Destroy(noteObject);
-        //        notesObjects[index++] = null;
-        //    }
-        //}
+        finishedNotes.ForEach(Destroy);
+
+        int index = 0;
+        foreach (GameObject noteObject in playingNotes)
+        {
+            if (noteObject != null)
+            {
+                Destroy(noteObject);
+                playingNotes[index++] = null;
+            }
+        }
 
         //TODO: get bpm from the midi file header
         sequencer = new MidiTrackSequencer(song.tracks[0], song.division, bpm);
@@ -63,7 +66,7 @@ public class Sequencer : MonoBehaviour
 
         transform.Translate(Vector3.back * pointsDown);
 
-        foreach (GameObject noteObject in notesObjects)
+        foreach (GameObject noteObject in playingNotes)
         {
             if (noteObject != null)
             {
@@ -93,7 +96,7 @@ public class Sequencer : MonoBehaviour
                     int octaveOffset = m.data1 % 12;
                     Debug.Log("Note On: " + notesNames[octaveOffset]);
 
-                    notesObjects[m.data1] = Instantiate(
+                    playingNotes[m.data1] = Instantiate(
                         octaveBlackKeysIndexes[octaveOffset] == 1 ? blackTile : whiteTile,
                         GetNotePosition(m.data1), 
                         transform.rotation, 
@@ -102,7 +105,8 @@ public class Sequencer : MonoBehaviour
                 }
                 else if ((m.status & 0xf0) == 0x80)
                 {
-                    notesObjects[m.data1] = null;
+                    finishedNotes.Add(playingNotes[m.data1]);
+                    playingNotes[m.data1] = null;
 
                     int octaveOffset = (int)m.data1 % 12;
                     Debug.Log("Note Off: " + notesNames[octaveOffset]);
