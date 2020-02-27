@@ -17,7 +17,7 @@ public class Sequencer : MonoBehaviour
 
     public TextAsset sourceFile;
     MidiFileContainer midiFile;
-    MidiTrackSequencer sequencer;
+    MidiSequencer sequencer;
 
     private int[] octaveBlackKeysIndexes = new int[] { 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0 };
     private int[] octaveBlackKeys = new int[] { 0, 0, 1, 1, 2, 2, 2, 3, 3, 4, 4, 5 };
@@ -45,9 +45,7 @@ public class Sequencer : MonoBehaviour
         }
 
         // TODO: get bpm from the midi file header
-        // TODO: start all tracks
-        MidiTrack firstNonEmptyTrack = midiFile.tracks.FirstOrDefault(track => track.ToString() != "");
-        sequencer = new MidiTrackSequencer(firstNonEmptyTrack, midiFile.division, bpm);
+        sequencer = new MidiSequencer(midiFile.tracks, midiFile.division, bpm);
         ApplyMessages(sequencer.Start());
     }
 
