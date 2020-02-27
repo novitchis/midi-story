@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using SmfLite;
 using System;
+using UnityEngine.Networking;
+using System.Linq;
 
 public class Sequencer : MonoBehaviour
 {
@@ -14,7 +16,7 @@ public class Sequencer : MonoBehaviour
     public float speedMultiplier;
 
     public TextAsset sourceFile;
-    MidiFileContainer song;
+    MidiFileContainer midiFile;
     MidiTrackSequencer sequencer;
 
     private int[] octaveBlackKeysIndexes = new int[] { 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0 };
@@ -42,14 +44,30 @@ public class Sequencer : MonoBehaviour
             }
         }
 
-        //TODO: get bpm from the midi file header
-        sequencer = new MidiTrackSequencer(song.tracks[0], song.division, bpm);
+        // TODO: get bpm from the midi file header
+        // TODO: start all tracks
+        MidiTrack firstNonEmptyTrack = midiFile.tracks.FirstOrDefault(track => track.ToString() != "");
+        sequencer = new MidiTrackSequencer(firstNonEmptyTrack, midiFile.division, bpm);
         ApplyMessages(sequencer.Start());
     }
 
+#if DEBUG
     IEnumerator Start()
     {
-        song = MidiFileLoader.Load(sourceFile.bytes);
+        midiFile = MidiFileLoader.Load(sourceFile.bytes);
+        yield return new WaitForSeconds(1.0f);
+        ResetAndPlay();
+    }
+#else
+    void Start()
+    {
+        GetImage.GetImageFromUserAsync(gameObject.name, "ReceiveImage");
+    }
+#endif
+
+    IEnumerator LoadMidiFile(byte[] fileBytes)
+    {
+        midiFile = MidiFileLoader.Load(fileBytes);
         yield return new WaitForSeconds(1.0f);
         ResetAndPlay();
     }
@@ -136,9 +154,25 @@ public class Sequencer : MonoBehaviour
 
     void OnGUI()
     {
-        if (GUI.Button(new Rect(10, 10, 150, 50), "Play/Stop"))
+        if (GUI.Button(new Rect(10, 10, 150, 50), "Restart"))
         {
             ResetAndPlay();
+        }
+    }
+
+    public void ReceiveImage(string dataUrl)
+    {
+        StartCoroutine(LoadBlob(dataUrl));
+    }
+
+    IEnumerator LoadBlob(string url)
+    {
+        UnityWebRequest webRequest = UnityWebRequest.Get(url);
+        yield return webRequest.SendWebRequest();
+
+        if (!webRequest.isNetworkError && !webRequest.isHttpError)
+        {
+            yield return LoadMidiFile(webRequest.downloadHandler.data);
         }
     }
 }
