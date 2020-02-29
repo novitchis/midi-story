@@ -16,7 +16,7 @@ namespace SmfLite
             trackSequencers = tracks.Select(track => new MidiTrackSequencer(track, ppqn, bpm)).ToList();
         }
 
-        public List<MidiEvent> Start ()
+        public List<IMidiEvent> Start ()
         {
             return trackSequencers
                 .Select(item => item.Start())
@@ -24,7 +24,7 @@ namespace SmfLite
                 .SelectMany(list => list).ToList();
         }
 
-        public List<MidiEvent> Advance (float deltaTime)
+        public List<IMidiEvent> Advance (float deltaTime)
         {
             if (!Playing) {
                 return null;
@@ -34,6 +34,11 @@ namespace SmfLite
                 .Select(item => item.Advance(deltaTime))
                 .Where(item => item != null)
                 .SelectMany(list => list).ToList();
+        }
+
+        public void SetBPM(float bpm)
+        {
+            trackSequencers.ForEach(track => track.SetBPM(bpm));
         }
     }
 }

@@ -7,6 +7,7 @@ namespace SmfLite
     {
         DeltaEventPairList.Enumerator enumerator;
         bool playing;
+        int ppqn;
         float pulsePerSecond;
         float pulseToNext;
         float pulseCounter;
@@ -17,11 +18,12 @@ namespace SmfLite
 
         public MidiTrackSequencer (MidiTrack track, int ppqn, float bpm)
         {
-            pulsePerSecond = bpm / 60.0f * ppqn;
+            this.ppqn = ppqn;
+            SetBPM(bpm);
             enumerator = track.GetEnumerator ();
         }
 
-        public List<MidiEvent> Start ()
+        public List<IMidiEvent> Start ()
         {
             if (enumerator.MoveNext ()) {
                 pulseToNext = enumerator.Current.delta;
@@ -33,7 +35,7 @@ namespace SmfLite
             }
         }
 
-        public List<MidiEvent> Advance (float deltaTime)
+        public List<IMidiEvent> Advance (float deltaTime)
         {
             if (!playing) {
                 return null;
@@ -45,7 +47,7 @@ namespace SmfLite
                 return null;
             }
 
-            var messages = new List<MidiEvent> ();
+            var messages = new List<IMidiEvent> ();
 
             while (pulseCounter >= pulseToNext) {
                 var pair = enumerator.Current;
@@ -60,6 +62,10 @@ namespace SmfLite
             }
 
             return messages;
+        }
+
+        public void SetBPM(float bpm) {
+            pulsePerSecond = bpm / 60.0f * ppqn;
         }
     }
 }

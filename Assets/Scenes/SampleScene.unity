@@ -1477,7 +1477,8 @@ MonoBehaviour:
   width: 18
   quarterNoteLength: 0.2
   speedMultiplier: 10
-  sourceFile: {fileID: 4900000, guid: df6fa1bd292771a479daf4d4cc5a03b5, type: 3}
+  sourceFile: {fileID: 4900000, guid: 9db374350eb3c824b86302b8bdf0489b, type: 3}
+  bpm: 120
 --- !u!1 &1022297171
 GameObject:
   m_ObjectHideFlags: 0

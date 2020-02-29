@@ -26,7 +26,8 @@ public class Sequencer : MonoBehaviour
     private GameObject[] playingNotes = new GameObject[108];
     private List<GameObject> finishedNotes = new List<GameObject>();
 
-    private int bpm = 80; 
+    // default midi file bpm
+    public float bpm = 120f; 
 
     void ResetAndPlay()
     {
@@ -44,7 +45,6 @@ public class Sequencer : MonoBehaviour
             }
         }
 
-        // TODO: get bpm from the midi file header
         sequencer = new MidiSequencer(midiFile.tracks, midiFile.division, bpm);
         ApplyMessages(sequencer.Start());
     }
@@ -73,11 +73,10 @@ public class Sequencer : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // is the amount would move per second if we the display can fit 60 seconds at once
+        // is the amount would move per second if the display can fit 60 seconds at once
         // in our case we want to display about 4 seconds at a time, in this case the fall
         // should be increased
-        float pointsPerSecond = (bpm / 60) * quarterNoteLength;
-
+        float pointsPerSecond = (bpm / 60f) * quarterNoteLength;
         float pointsDown = pointsPerSecond * Time.deltaTime * speedMultiplier;
 
         transform.Translate(Vector3.back * pointsDown);
@@ -97,46 +96,75 @@ public class Sequencer : MonoBehaviour
         }
     }
 
-    void ApplyMessages(List<MidiEvent> messages)
+    void ApplyMessages(List<IMidiEvent> messages)
     {
         if (messages != null)
         {
-            foreach (var m in messages)
+            foreach (var message in messages)
             {
-                if ((m.status & 0xf0) == 0x90)
-                {
-                    // the range of keys visible on keyboard is: 21 - 108
-                    if (m.data1 < 21 || m.data1 > 108)
-                        continue;
+                //Debug.Log("Message: " + message);
 
-                    int octaveOffset = m.data1 % 12;
-                    //Debug.Log("Note On: " + notesNames[octaveOffset] + " [ " + m.ToString() + " ] " );
+                if (message is MidiMetaEvent) {
+                    MidiMetaEvent midiMetaEvent = (MidiMetaEvent)message;
 
-                    if (m.data2 != 0)
+                    // set tempo event
+                    if (midiMetaEvent.type == 0x51)
                     {
-                        playingNotes[m.data1] = Instantiate(
-                            octaveBlackKeysIndexes[octaveOffset] == 1 ? blackTile : whiteTile,
-                            GetNotePosition(m.data1), 
-                            transform.rotation, 
-                            transform
-                        );
-                    }
-                    else
-                    {
-                        finishedNotes.Add(playingNotes[m.data1]);
-                        playingNotes[m.data1] = null;
+                        bpm = GetBPM(midiMetaEvent.bytes);
+                        sequencer.SetBPM(bpm);
                     }
                 }
-                else if ((m.status & 0xf0) == 0x80)
+                else if (message is MidiEvent)
                 {
-                    finishedNotes.Add(playingNotes[m.data1]);
-                    playingNotes[m.data1] = null;
+                    MidiEvent midiEvent = (MidiEvent)message;
+                    if ((midiEvent.status & 0xf0) == 0x90)
+                    {
+                        // the range of keys visible on keyboard is: 21 - 108
+                        if (midiEvent.data1 < 21 || midiEvent.data1 > 108)
+                            continue;
 
-                    int octaveOffset = (int)m.data1 % 12;
-                    //Debug.Log("Note Off: " + notesNames[octaveOffset]);
+                        int octaveOffset = midiEvent.data1 % 12;
+                        //Debug.Log("Note On: " + notesNames[octaveOffset] + " [ " + m.ToString() + " ] " );
+
+                        if (midiEvent.data2 != 0)
+                        {
+                            playingNotes[midiEvent.data1] = Instantiate(
+                                octaveBlackKeysIndexes[octaveOffset] == 1 ? blackTile : whiteTile,
+                                GetNotePosition(midiEvent.data1), 
+                                transform.rotation, 
+                                transform
+                            );
+                        }
+                        else
+                        {
+                            finishedNotes.Add(playingNotes[midiEvent.data1]);
+                            playingNotes[midiEvent.data1] = null;
+                        }
+                    }
+                    else if ((midiEvent.status & 0xf0) == 0x80)
+                    {
+                        finishedNotes.Add(playingNotes[midiEvent.data1]);
+                        playingNotes[midiEvent.data1] = null;
+
+                        int octaveOffset = (int)midiEvent.data1 % 12;
+                        //Debug.Log("Note Off: " + notesNames[octaveOffset]);
+                    }
                 }
+
             }
         }
+    }
+
+    private float GetBPM(byte[] bytes)
+    {
+        int microsecondsPerQuarterNote = 0;
+        foreach (byte tempoByte in bytes)
+        {
+            microsecondsPerQuarterNote <<= 8;
+            microsecondsPerQuarterNote |= tempoByte;
+        }
+
+        return 60 * (1000000f / microsecondsPerQuarterNote);
     }
 
     private Vector3 GetNotePosition(byte note)

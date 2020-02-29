@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SmfLite
 {
@@ -63,11 +64,19 @@ namespace SmfLite
                     ev = reader.ReadByte ();
                 }
 
-                if (ev == 0xff) {
-                    // 0xff: Meta event (unused).
-                    reader.Advance (1);
-                    reader.Advance (reader.ReadMultiByteValue ());
-                } else if (ev == 0xf0) {
+                // 0xff: Meta event 
+                if (ev == 0xff)
+                {
+                    byte type = reader.ReadByte();
+                    int len = reader.ReadMultiByteValue();
+                    byte[] bytes = new byte[len];
+
+                    foreach(int index in Enumerable.Range(0, len)) 
+                        bytes[index] = reader.ReadByte();
+
+                    track.AddEvent(delta, new MidiMetaEvent(type, bytes));
+                }
+                else if (ev == 0xf0) {
                     // 0xf0: SysEx (unused).
                     while (reader.ReadByte() != 0xf7) {
                     }

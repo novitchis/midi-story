@@ -8,9 +8,9 @@ namespace SmfLite
         public struct DeltaEventPair
         {
             public int delta;
-            public MidiEvent midiEvent;
+            public IMidiEvent midiEvent;
 
-            public DeltaEventPair (int delta, MidiEvent midiEvent)
+            public DeltaEventPair (int delta, IMidiEvent midiEvent)
             {
                 this.delta = delta;
                 this.midiEvent = midiEvent;
@@ -29,7 +29,7 @@ namespace SmfLite
             sequence = new List<DeltaEventPair> ();
         }
 
-        public void AddEvent (int delta, MidiEvent midiEvent)
+        public void AddEvent (int delta, IMidiEvent midiEvent)
         {
             sequence.Add (new DeltaEventPair (delta, midiEvent));
         }

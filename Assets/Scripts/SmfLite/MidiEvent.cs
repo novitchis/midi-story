@@ -1,7 +1,10 @@
+using System;
+using System.Linq;
+
 namespace SmfLite
 {
     // MIDI event struct.
-    public struct MidiEvent
+    public struct MidiEvent : IMidiEvent
     {
         public byte status;
         public byte data1;
@@ -18,5 +21,26 @@ namespace SmfLite
         {
             return "[" + status.ToString ("X") + "," + data1.ToString ("X") + "," + data2.ToString ("X") + "]";
         }
+    }
+
+    public struct MidiMetaEvent : IMidiEvent
+    {
+        public byte type;
+        public byte[] bytes;
+
+        public MidiMetaEvent(byte type, byte[] bytes)
+        {
+            this.type = type;
+            this.bytes = bytes;
+        }
+
+        public override string ToString()
+        {
+            return "[FF " + type.ToString("X") + "," + String.Join(" ", bytes.Select(b => b.ToString("X"))) + "]";
+        }
+    }
+
+    public interface IMidiEvent
+    {
     }
 }
