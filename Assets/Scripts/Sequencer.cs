@@ -110,14 +110,22 @@ public class Sequencer : MonoBehaviour
                         continue;
 
                     int octaveOffset = m.data1 % 12;
-                    Debug.Log("Note On: " + notesNames[octaveOffset]);
+                    //Debug.Log("Note On: " + notesNames[octaveOffset] + " [ " + m.ToString() + " ] " );
 
-                    playingNotes[m.data1] = Instantiate(
-                        octaveBlackKeysIndexes[octaveOffset] == 1 ? blackTile : whiteTile,
-                        GetNotePosition(m.data1), 
-                        transform.rotation, 
-                        transform
-                    );
+                    if (m.data2 != 0)
+                    {
+                        playingNotes[m.data1] = Instantiate(
+                            octaveBlackKeysIndexes[octaveOffset] == 1 ? blackTile : whiteTile,
+                            GetNotePosition(m.data1), 
+                            transform.rotation, 
+                            transform
+                        );
+                    }
+                    else
+                    {
+                        finishedNotes.Add(playingNotes[m.data1]);
+                        playingNotes[m.data1] = null;
+                    }
                 }
                 else if ((m.status & 0xf0) == 0x80)
                 {
@@ -125,7 +133,7 @@ public class Sequencer : MonoBehaviour
                     playingNotes[m.data1] = null;
 
                     int octaveOffset = (int)m.data1 % 12;
-                    Debug.Log("Note Off: " + notesNames[octaveOffset]);
+                    //Debug.Log("Note Off: " + notesNames[octaveOffset]);
                 }
             }
         }
