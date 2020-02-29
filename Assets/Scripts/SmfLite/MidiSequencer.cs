@@ -18,7 +18,10 @@ namespace SmfLite
 
         public List<MidiEvent> Start ()
         {
-            return trackSequencers.SelectMany(item => item.Start()).ToList();
+            return trackSequencers
+                .Select(item => item.Start())
+                .Where(item => item != null)
+                .SelectMany(list => list).ToList();
         }
 
         public List<MidiEvent> Advance (float deltaTime)
@@ -27,7 +30,10 @@ namespace SmfLite
                 return null;
             }
 
-            return trackSequencers.SelectMany(item => item.Advance(deltaTime)).ToList();
+            return trackSequencers
+                .Select(item => item.Advance(deltaTime))
+                .Where(item => item != null)
+                .SelectMany(list => list).ToList();
         }
     }
 }
