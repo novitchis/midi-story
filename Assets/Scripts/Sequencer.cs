@@ -176,13 +176,13 @@ public class Sequencer : MonoBehaviour
         int totalWhiteKeys = 51;
 
         float whiteKeyWidth = width / totalWhiteKeys;
-        float offsetX = whiteKeyWidth * precedingWhiteKeys;
+        float offsetX = whiteKeyWidth * precedingWhiteKeys + whiteKeyWidth / 2;
 
         //black keys need an offset
         if (octaveBlackKeysIndexes[note % 12] == 1)
-            offsetX -= whiteKeyWidth / 2;
+            offsetX -= whiteKeyWidth;
 
-        
+
         return new Vector3(transform.position.x + offsetX, 1, 0);
     }
 
