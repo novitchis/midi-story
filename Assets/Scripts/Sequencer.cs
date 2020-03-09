@@ -8,12 +8,15 @@ using System.Linq;
 
 public class Sequencer : MonoBehaviour
 {
-    public GameObject blackTile;
-    public GameObject whiteTile;
+    public GameObject blackTile = null;
+    public GameObject whiteTile = null;
+    public GameObject gridLine = null;
 
     public float width;
     public float quarterNoteLength;
     public float speedMultiplier;
+
+    public byte testNoteIndex = 0;
 
     public TextAsset sourceFile;
     MidiFileContainer midiFile;
@@ -52,6 +55,8 @@ public class Sequencer : MonoBehaviour
 #if DEBUG
     IEnumerator Start()
     {
+        SpawnGridLines();
+
         midiFile = MidiFileLoader.Load(sourceFile.bytes);
         yield return new WaitForSeconds(1.0f);
         ResetAndPlay();
@@ -59,11 +64,29 @@ public class Sequencer : MonoBehaviour
 #else
     void Start()
     {
+        SpawnGridLines();
         GetImage.GetImageFromUserAsync(gameObject.name, "ReceiveImage");
     }
 #endif
 
-    IEnumerator LoadMidiFile(byte[] fileBytes)
+    private void SpawnGridLines()
+    {
+        float whiteKeyWidth = width / 52;
+        float offset = whiteKeyWidth * 2;
+
+        for (int index = 0; index < 7; index++)
+        {
+            // octave line
+            Instantiate(gridLine, new Vector3(-9 + offset, 1, -2), gridLine.transform.rotation);
+            // second line
+            Instantiate(gridLine, new Vector3(-9 + offset + whiteKeyWidth * 3, 1, -2), gridLine.transform.rotation);
+            offset += whiteKeyWidth * 7; 
+        }
+        // one more line at the end
+        Instantiate(gridLine, new Vector3(-9 + offset, 1, -2), gridLine.transform.rotation);
+    }
+
+    private IEnumerator LoadMidiFile(byte[] fileBytes)
     {
         midiFile = MidiFileLoader.Load(fileBytes);
         yield return new WaitForSeconds(1.0f);
@@ -130,7 +153,7 @@ public class Sequencer : MonoBehaviour
                         {
                             playingNotes[midiEvent.data1] = Instantiate(
                                 octaveBlackKeysIndexes[octaveOffset] == 1 ? blackTile : whiteTile,
-                                GetNotePosition(midiEvent.data1), 
+                                GetNotePosition(testNoteIndex != 0 ? testNoteIndex : midiEvent.data1), 
                                 transform.rotation, 
                                 transform
                             );
@@ -173,7 +196,7 @@ public class Sequencer : MonoBehaviour
         
         // 12 is the white keys count not visible on the piano on bottom
         int precedingWhiteKeys = note - precedingBlackKeys - 12;
-        int totalWhiteKeys = 51;
+        int totalWhiteKeys = 52;
 
         float whiteKeyWidth = width / totalWhiteKeys;
         float offsetX = whiteKeyWidth * precedingWhiteKeys + whiteKeyWidth / 2;
