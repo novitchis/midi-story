@@ -14,7 +14,7 @@ public class Sequencer : MonoBehaviour
 
     public float width;
     public float quarterNoteLength;
-    public float speedMultiplier;
+    public float speedMultiplier = 5f;
 
     public byte testNoteIndex = 0;
 
@@ -203,8 +203,26 @@ public class Sequencer : MonoBehaviour
 
         //black keys need an offset
         if (octaveBlackKeysIndexes[note % 12] == 1)
-            offsetX -= whiteKeyWidth;
+        {
+            // there are the types of black keys left. middle, right
 
+            // middle between two white notes
+            offsetX -= whiteKeyWidth / 2;
+
+            // note index in octave
+            int noteIndex = note % 12;
+
+            // left black key c#, f#
+            if (noteIndex == 1 || noteIndex == 6)
+            {
+                offsetX -= whiteKeyWidth / 10;
+            }
+            else if (noteIndex == 3 || noteIndex == 10)
+            {
+                // right black key d#, a#
+                offsetX += whiteKeyWidth / 10;
+            }
+        }
 
         return new Vector3(transform.position.x + offsetX, 1, 0);
     }

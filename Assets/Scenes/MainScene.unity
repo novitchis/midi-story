@@ -454,7 +454,7 @@ MonoBehaviour:
     type: 3}
   width: 18
   quarterNoteLength: 0.2
-  speedMultiplier: 10
+  speedMultiplier: 5
   testNoteIndex: 0
-  sourceFile: {fileID: 4900000, guid: 3116285c03405704f90e5df995ced59e, type: 3}
+  sourceFile: {fileID: 4900000, guid: 9db374350eb3c824b86302b8bdf0489b, type: 3}
   bpm: 120
