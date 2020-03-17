@@ -5,24 +5,24 @@ using SmfLite;
 using System;
 using UnityEngine.Networking;
 using System.Linq;
+using Assets.Scripts;
 
 public class Sequencer : MonoBehaviour
 {
-    public GameObject blackTile = null;
-    public GameObject whiteTile = null;
-    public GameObject gridLine = null;
+    public KeyboardAnimator keyboard;
+
+    public GameObject blackTile;
+    public GameObject whiteTile;
+    public GameObject gridLine;
 
     public float width;
     public float quarterNoteLength;
     public float speedMultiplier = 5f;
 
-    public byte testNoteIndex = 0;
-
     public TextAsset sourceFile;
     MidiFileContainer midiFile;
     MidiSequencer sequencer;
 
-    private int[] octaveBlackKeysIndexes = new int[] { 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0 };
     private int[] octaveBlackKeys = new int[] { 0, 0, 1, 1, 2, 2, 2, 3, 3, 4, 4, 5 };
     private string[] notesNames = new string[] { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
 
@@ -146,36 +146,38 @@ public class Sequencer : MonoBehaviour
                         if (midiEvent.data1 < 21 || midiEvent.data1 > 108)
                             continue;
 
-                        int octaveOffset = midiEvent.data1 % 12;
-                        //Debug.Log("Note On: " + notesNames[octaveOffset] + " [ " + m.ToString() + " ] " );
-
                         if (midiEvent.data2 != 0)
-                        {
-                            playingNotes[midiEvent.data1] = Instantiate(
-                                octaveBlackKeysIndexes[octaveOffset] == 1 ? blackTile : whiteTile,
-                                GetNotePosition(testNoteIndex != 0 ? testNoteIndex : midiEvent.data1), 
-                                transform.rotation, 
-                                transform
-                            );
-                        }
+                            HandleKeyDown(midiEvent.data1);
                         else
-                        {
-                            finishedNotes.Add(playingNotes[midiEvent.data1]);
-                            playingNotes[midiEvent.data1] = null;
-                        }
+                            HandleKeyUp(midiEvent.data1);
                     }
                     else if ((midiEvent.status & 0xf0) == 0x80)
                     {
-                        finishedNotes.Add(playingNotes[midiEvent.data1]);
-                        playingNotes[midiEvent.data1] = null;
-
-                        int octaveOffset = (int)midiEvent.data1 % 12;
-                        //Debug.Log("Note Off: " + notesNames[octaveOffset]);
+                        HandleKeyUp(midiEvent.data1);
                     }
                 }
-
             }
         }
+    }
+
+    private void HandleKeyDown(byte note)
+    {
+        playingNotes[note] = Instantiate(
+            NoteUtils.IsBlackKey(note) ? blackTile : whiteTile,
+            GetNotePosition(note),
+            transform.rotation,
+            transform
+        );
+
+        keyboard.SetKeyPressed(note, true);
+    }
+
+    private void HandleKeyUp(byte note)
+    {
+        finishedNotes.Add(playingNotes[note]);
+        playingNotes[note] = null;
+
+        keyboard.SetKeyPressed(note, false);
     }
 
     private float GetBPM(byte[] bytes)
@@ -202,7 +204,7 @@ public class Sequencer : MonoBehaviour
         float offsetX = whiteKeyWidth * precedingWhiteKeys + whiteKeyWidth / 2;
 
         //black keys need an offset
-        if (octaveBlackKeysIndexes[note % 12] == 1)
+        if (NoteUtils.IsBlackKey(note))
         {
             // there are the types of black keys left. middle, right
 

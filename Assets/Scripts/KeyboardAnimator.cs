@@ -1,32 +1,44 @@
-﻿using System.Collections;
+﻿using Assets.Scripts;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class KeyboardAnimator : MonoBehaviour
 {
-    public Material blackKeyMaterial;
-    public Material whiteKeyMaterial;
-    private Material originalMaterial = null;
+    public Material pressedBlackKey;
+    public Material pressedWhiteKey;
 
-    // Start is called before the first frame update
-    void Start()
+    public Material blackKey;
+    public Material whiteKey;
+
+    public void SetKeyPressed(byte note, bool pressed)
     {
-        originalMaterial = GameObject.Find("Keys").GetComponent<Renderer>().material;
+        // first 21 notes are not visible on keyboard
+        int childIndex = note - 20;
+
+        this.transform.GetChild(childIndex).GetComponent<Renderer>().material = pressed ? GetPressedMaterial(note) : GetIddleMaterial(note);
+    }
+
+    private Material GetPressedMaterial(byte note)
+    {
+        return NoteUtils.IsBlackKey(note) ? pressedBlackKey : pressedWhiteKey;
+    }
+
+    private Material GetIddleMaterial(byte note)
+    {
+        return NoteUtils.IsBlackKey(note) ? blackKey : whiteKey;
     }
 
     // Update is called once per frame
-    //void Update()
-    //{
-    //    if (Input.GetKeyDown(KeyCode.Space))
-    //    {
-    //        GameObject.Find("Keys").GetComponent<Renderer>().material = whiteKeyMaterial;
-
-    //        //animator.SetBool("isDown", true);
-    //    }
-    //    else if (Input.GetKeyUp(KeyCode.Space))
-    //    {
-    //        GameObject.Find("Keys").GetComponent<Renderer>().material = originalMaterial;
-    //        //animator.SetBool("isDown", false);
-    //    }
-    //}
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            SetKeyPressed(60, true);
+        }
+        else if (Input.GetKeyUp(KeyCode.Space))
+        {
+            SetKeyPressed(60, false);
+        }
+    }
 }
