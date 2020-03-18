@@ -49,7 +49,13 @@ public class Sequencer : MonoBehaviour
         }
 
         sequencer = new MidiSequencer(midiFile.tracks, midiFile.division, bpm);
-        ApplyMessages(sequencer.Start());
+        ApplyMessages(sequencer.Start(), 0, 0);
+
+        float totalTime = 0;
+        while (sequencer.Playing) {
+            ApplyMessages(sequencer.Advance(0.05f), 0.05f, totalTime);
+            totalTime += 0.05f;
+        }
     }
 
 #if DEBUG
@@ -103,24 +109,17 @@ public class Sequencer : MonoBehaviour
         float pointsDown = pointsPerSecond * Time.deltaTime * speedMultiplier;
 
         transform.Translate(Vector3.back * pointsDown);
-
-        foreach (GameObject noteObject in playingNotes)
-        {
-            if (noteObject != null)
-            {
-                noteObject.transform.localScale += Vector3.forward * pointsDown;
-                noteObject.transform.Translate(Vector3.forward * pointsDown / 2);
-            }
-        }
-
-        if (sequencer != null && sequencer.Playing)
-        {
-            ApplyMessages(sequencer.Advance(Time.deltaTime));
-        }
     }
 
-    void ApplyMessages(List<IMidiEvent> messages)
+    void ApplyMessages(List<IMidiEvent> messages, float deltaTime, float totalTime)
     {
+        // is the amount would move per second if the display can fit 60 seconds at once
+        // in our case we want to display about 4 seconds at a time, in this case the fall
+        // should be increased
+        float pointsPerSecond = (bpm / 60f) * quarterNoteLength;
+        float pointsDown = pointsPerSecond * deltaTime * speedMultiplier;
+        float offsetZ = pointsPerSecond * totalTime * speedMultiplier;
+
         if (messages != null)
         {
             foreach (var message in messages)
@@ -146,7 +145,7 @@ public class Sequencer : MonoBehaviour
                             continue;
 
                         if (midiEvent.data2 != 0)
-                            HandleKeyDown(midiEvent.data1);
+                            HandleKeyDown(midiEvent.data1, offsetZ);
                         else
                             HandleKeyUp(midiEvent.data1);
                     }
@@ -157,18 +156,28 @@ public class Sequencer : MonoBehaviour
                 }
             }
         }
+
+        foreach (GameObject noteObject in playingNotes)
+        {
+            if (noteObject != null)
+            {
+                noteObject.transform.localScale += Vector3.forward * pointsDown;
+                noteObject.transform.Translate(Vector3.forward * pointsDown / 2);
+            }
+        }
     }
 
-    private void HandleKeyDown(byte note)
+    private void HandleKeyDown(byte note, float offsetZ)
     {
         playingNotes[note] = Instantiate(
             NoteUtils.IsBlackKey(note) ? blackTile : whiteTile,
-            GetNotePosition(note),
+            GetNotePosition(note, offsetZ),
             transform.rotation,
             transform
         );
 
-        keyboard.SetKeyPressed(note, true);
+        // TODO: keyboard pressing when the note is received does not make sense anymore
+        //keyboard.SetKeyPressed(note, true);
     }
 
     private void HandleKeyUp(byte note)
@@ -176,7 +185,7 @@ public class Sequencer : MonoBehaviour
         finishedNotes.Add(playingNotes[note]);
         playingNotes[note] = null;
 
-        keyboard.SetKeyPressed(note, false);
+        //keyboard.SetKeyPressed(note, false);
     }
 
     private float GetBPM(byte[] bytes)
@@ -191,7 +200,7 @@ public class Sequencer : MonoBehaviour
         return 60 * (1000000f / microsecondsPerQuarterNote);
     }
 
-    private Vector3 GetNotePosition(byte note)
+    private Vector3 GetNotePosition(byte note, float offsetZ)
     {
         int y = 1;
         int precedingBlackKeys = (note / 12) * 5 + octaveBlackKeys[note % 12];
@@ -228,7 +237,7 @@ public class Sequencer : MonoBehaviour
             y = 2;
         }
 
-        return new Vector3(transform.position.x + offsetX, y, 0);
+        return new Vector3(transform.position.x + offsetX, y, offsetZ);
     }
 
     void OnGUI()
