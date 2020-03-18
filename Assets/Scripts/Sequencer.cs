@@ -125,9 +125,8 @@ public class Sequencer : MonoBehaviour
         {
             foreach (var message in messages)
             {
-                //Debug.Log("Message: " + message);
-
-                if (message is MidiMetaEvent) {
+                if (message is MidiMetaEvent)
+                {
                     MidiMetaEvent midiMetaEvent = (MidiMetaEvent)message;
 
                     // set tempo event
@@ -194,6 +193,7 @@ public class Sequencer : MonoBehaviour
 
     private Vector3 GetNotePosition(byte note)
     {
+        int y = 1;
         int precedingBlackKeys = (note / 12) * 5 + octaveBlackKeys[note % 12];
         
         // 12 is the white keys count not visible on the piano on bottom
@@ -224,9 +224,11 @@ public class Sequencer : MonoBehaviour
                 // right black key d#, a#
                 offsetX += whiteKeyWidth / 10;
             }
+
+            y = 2;
         }
 
-        return new Vector3(transform.position.x + offsetX, 1, 0);
+        return new Vector3(transform.position.x + offsetX, y, 0);
     }
 
     void OnGUI()
