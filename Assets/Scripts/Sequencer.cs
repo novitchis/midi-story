@@ -16,7 +16,7 @@ public class Sequencer : MonoBehaviour
     public GameObject gridLine;
 
     public float width;
-    public float pointsDownPerSecond = 4;
+    public float pointsPerSecond = 4;
 
     public TextAsset sourceFile;
 
@@ -31,7 +31,7 @@ public class Sequencer : MonoBehaviour
 
     void ResetAndPlay()
     {
-        transform.position = new Vector3(-9, 2, 0);
+        transform.position = new Vector3(transform.position.x, transform.position.y, 0);
 
         finishedNotes.ForEach(Destroy);
 
@@ -45,10 +45,11 @@ public class Sequencer : MonoBehaviour
             }
         }
 
+        // offset the position by the screen size to start notes falling from the top
+        float totalTime = 8 / pointsPerSecond;
         sequencer = new MidiSequencer(midiFile.tracks, midiFile.division, 120);
-        ApplyMessages(sequencer.Start(), 0, 0);
+        ApplyMessages(sequencer.Start(), 0, totalTime);
 
-        float totalTime = 0;
         while (sequencer.Playing) {
             totalTime += 0.05f;
             ApplyMessages(sequencer.Advance(0.05f), 0.05f, totalTime);
@@ -99,13 +100,13 @@ public class Sequencer : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        transform.Translate(Vector3.back * pointsDownPerSecond * Time.deltaTime);
+        transform.Translate(Vector3.back * pointsPerSecond * Time.deltaTime);
     }
 
     void ApplyMessages(List<IMidiEvent> messages, float deltaTime, float totalTime)
     {
-        float pointsDown = pointsDownPerSecond * deltaTime;
-        float offsetZ = pointsDownPerSecond * totalTime;
+        float pointsDown = pointsPerSecond * deltaTime;
+        float offsetZ = pointsPerSecond * totalTime;
 
         foreach (GameObject noteObject in playingNotes)
         {
