@@ -16,21 +16,18 @@ public class Sequencer : MonoBehaviour
     public GameObject gridLine;
 
     public float width;
-    public float quarterNoteLength;
-    public float speedMultiplier = 5f;
+    public float pointsDownPerSecond = 4;
 
     public TextAsset sourceFile;
-    MidiFileContainer midiFile;
-    MidiSequencer sequencer;
+
+    private MidiFileContainer midiFile;
+    private MidiSequencer sequencer = null;
 
     private int[] octaveBlackKeys = new int[] { 0, 0, 1, 1, 2, 2, 2, 3, 3, 4, 4, 5 };
     private string[] notesNames = new string[] { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
 
     private GameObject[] playingNotes = new GameObject[108];
     private List<GameObject> finishedNotes = new List<GameObject>();
-
-    // default midi file bpm
-    public float bpm = 120f; 
 
     void ResetAndPlay()
     {
@@ -48,13 +45,13 @@ public class Sequencer : MonoBehaviour
             }
         }
 
-        sequencer = new MidiSequencer(midiFile.tracks, midiFile.division, bpm);
+        sequencer = new MidiSequencer(midiFile.tracks, midiFile.division, 120);
         ApplyMessages(sequencer.Start(), 0, 0);
 
         float totalTime = 0;
         while (sequencer.Playing) {
-            ApplyMessages(sequencer.Advance(0.05f), 0.05f, totalTime);
             totalTime += 0.05f;
+            ApplyMessages(sequencer.Advance(0.05f), 0.05f, totalTime);
         }
     }
 
@@ -102,23 +99,22 @@ public class Sequencer : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // is the amount would move per second if the display can fit 60 seconds at once
-        // in our case we want to display about 4 seconds at a time, in this case the fall
-        // should be increased
-        float pointsPerSecond = (bpm / 60f) * quarterNoteLength;
-        float pointsDown = pointsPerSecond * Time.deltaTime * speedMultiplier;
-
-        transform.Translate(Vector3.back * pointsDown);
+        transform.Translate(Vector3.back * pointsDownPerSecond * Time.deltaTime);
     }
 
     void ApplyMessages(List<IMidiEvent> messages, float deltaTime, float totalTime)
     {
-        // is the amount would move per second if the display can fit 60 seconds at once
-        // in our case we want to display about 4 seconds at a time, in this case the fall
-        // should be increased
-        float pointsPerSecond = (bpm / 60f) * quarterNoteLength;
-        float pointsDown = pointsPerSecond * deltaTime * speedMultiplier;
-        float offsetZ = pointsPerSecond * totalTime * speedMultiplier;
+        float pointsDown = pointsDownPerSecond * deltaTime;
+        float offsetZ = pointsDownPerSecond * totalTime;
+
+        foreach (GameObject noteObject in playingNotes)
+        {
+            if (noteObject != null)
+            {
+                noteObject.transform.localScale += Vector3.forward * pointsDown;
+                noteObject.transform.Translate(Vector3.forward * pointsDown / 2);
+            }
+        }
 
         if (messages != null)
         {
@@ -130,10 +126,7 @@ public class Sequencer : MonoBehaviour
 
                     // set tempo event
                     if (midiMetaEvent.type == 0x51)
-                    {
-                        bpm = GetBPM(midiMetaEvent.bytes);
-                        sequencer.SetBPM(bpm);
-                    }
+                        sequencer.SetBPM(GetBPM(midiMetaEvent.bytes));
                 }
                 else if (message is MidiEvent)
                 {
@@ -155,16 +148,7 @@ public class Sequencer : MonoBehaviour
                     }
                 }
             }
-        }
-
-        foreach (GameObject noteObject in playingNotes)
-        {
-            if (noteObject != null)
-            {
-                noteObject.transform.localScale += Vector3.forward * pointsDown;
-                noteObject.transform.Translate(Vector3.forward * pointsDown / 2);
-            }
-        }
+        }        
     }
 
     private void HandleKeyDown(byte note, float offsetZ)
