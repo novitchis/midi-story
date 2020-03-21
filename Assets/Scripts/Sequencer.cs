@@ -28,36 +28,12 @@ public class Sequencer : MonoBehaviour
 
     private GameObject[] playingNotes = new GameObject[108];
     private List<GameObject> finishedNotes = new List<GameObject>();
-
-    void ResetAndPlay()
-    {
-        transform.position = new Vector3(transform.position.x, transform.position.y, 0);
-
-        finishedNotes.ForEach(Destroy);
-
-        int index = 0;
-        foreach (GameObject noteObject in playingNotes)
-        {
-            if (noteObject != null)
-            {
-                Destroy(noteObject);
-                playingNotes[index++] = null;
-            }
-        }
-
-        // offset the position by the screen size to start notes falling from the top
-        float totalTime = 8 / pointsPerSecond;
-        sequencer = new MidiSequencer(midiFile.tracks, midiFile.division, 120);
-        ApplyMessages(sequencer.Start(), 0, totalTime);
-
-        while (sequencer.Playing) {
-            totalTime += 0.05f;
-            ApplyMessages(sequencer.Advance(0.05f), 0.05f, totalTime);
-        }
-    }
+    private List<KeyValuePair<float, MidiEvent>> timeToEvent = new List<KeyValuePair<float, MidiEvent>>();
+    private int timerIndex = 0;
+    private float time = 0;
 
 #if DEBUG
-    IEnumerator Start()
+    private IEnumerator Start()
     {
         SpawnGridLines();
 
@@ -72,6 +48,30 @@ public class Sequencer : MonoBehaviour
         GetImage.GetImageFromUserAsync(gameObject.name, "ReceiveImage");
     }
 #endif
+
+    // Update is called once per frame
+    private void Update()
+    {
+        AdvancePlayer(Time.deltaTime);
+    }
+
+    private void AdvancePlayer(float deltaTime)
+    {
+        transform.Translate(Vector3.back * pointsPerSecond * deltaTime);
+
+        // execute events on keyboard
+        time += deltaTime;
+        while (timeToEvent.Count > timerIndex && timeToEvent[timerIndex].Key <= time)
+        {
+            MidiEvent midiEvent = timeToEvent[timerIndex].Value;
+            if ((midiEvent.status & 0xf0) == 0x90 && midiEvent.data2 != 0)
+                keyboard.SetKeyPressed(midiEvent.data1, true);
+            else if (((midiEvent.status & 0xf0) == 0x90 && midiEvent.data2 == 0) || (midiEvent.status & 0xf0) == 0x80)
+                keyboard.SetKeyPressed(midiEvent.data1, false);
+
+            timerIndex++;
+        }
+    }
 
     private void SpawnGridLines()
     {
@@ -97,13 +97,40 @@ public class Sequencer : MonoBehaviour
         ResetAndPlay();
     }
 
-    // Update is called once per frame
-    void Update()
+    private void ResetAndPlay()
     {
-        transform.Translate(Vector3.back * pointsPerSecond * Time.deltaTime);
+        transform.position = new Vector3(transform.position.x, transform.position.y, 0);
+
+        time = 0;
+        timerIndex = 0;
+        timeToEvent.Clear();
+        keyboard.Clear();
+
+        finishedNotes.ForEach(Destroy);
+
+        int index = 0;
+        foreach (GameObject noteObject in playingNotes)
+        {
+            if (noteObject != null)
+            {
+                Destroy(noteObject);
+                playingNotes[index++] = null;
+            }
+        }
+
+        // offset the position by the screen size to start notes falling from the top
+        float totalTime = 8 / pointsPerSecond;
+        sequencer = new MidiSequencer(midiFile.tracks, midiFile.division, 120);
+        ApplyMessages(sequencer.Start(), 0, totalTime);
+
+        while (sequencer.Playing)
+        {
+            totalTime += 0.05f;
+            ApplyMessages(sequencer.Advance(0.05f), 0.05f, totalTime);
+        }
     }
 
-    void ApplyMessages(List<IMidiEvent> messages, float deltaTime, float totalTime)
+    private void ApplyMessages(List<IMidiEvent> messages, float deltaTime, float totalTime)
     {
         float pointsDown = pointsPerSecond * deltaTime;
         float offsetZ = pointsPerSecond * totalTime;
@@ -142,10 +169,17 @@ public class Sequencer : MonoBehaviour
                             HandleKeyDown(midiEvent.data1, offsetZ);
                         else
                             HandleKeyUp(midiEvent.data1);
+
+                        timeToEvent.Add(new KeyValuePair<float, MidiEvent>(totalTime, midiEvent));
                     }
                     else if ((midiEvent.status & 0xf0) == 0x80)
                     {
+                        // the range of keys visible on keyboard is: 21 - 108
+                        if (midiEvent.data1 < 21 || midiEvent.data1 > 108)
+                            continue;
+
                         HandleKeyUp(midiEvent.data1);
+                        timeToEvent.Add(new KeyValuePair<float, MidiEvent>(totalTime, midiEvent));
                     }
                 }
             }
@@ -160,17 +194,12 @@ public class Sequencer : MonoBehaviour
             transform.rotation,
             transform
         );
-
-        // TODO: keyboard pressing when the note is received does not make sense anymore
-        //keyboard.SetKeyPressed(note, true);
     }
 
     private void HandleKeyUp(byte note)
     {
         finishedNotes.Add(playingNotes[note]);
         playingNotes[note] = null;
-
-        //keyboard.SetKeyPressed(note, false);
     }
 
     private float GetBPM(byte[] bytes)
@@ -225,7 +254,7 @@ public class Sequencer : MonoBehaviour
         return new Vector3(transform.position.x + offsetX, y, offsetZ);
     }
 
-    void OnGUI()
+    private void OnGUI()
     {
         if (GUI.Button(new Rect(10, 10, 150, 50), "Restart"))
         {
@@ -238,7 +267,7 @@ public class Sequencer : MonoBehaviour
         StartCoroutine(LoadBlob(dataUrl));
     }
 
-    IEnumerator LoadBlob(string url)
+    private IEnumerator LoadBlob(string url)
     {
         UnityWebRequest webRequest = UnityWebRequest.Get(url);
         yield return webRequest.SendWebRequest();

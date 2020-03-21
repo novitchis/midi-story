@@ -1,6 +1,7 @@
 ﻿using Assets.Scripts;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class KeyboardAnimator : MonoBehaviour
@@ -27,6 +28,12 @@ public class KeyboardAnimator : MonoBehaviour
     private Material GetIddleMaterial(byte note)
     {
         return NoteUtils.IsBlackKey(note) ? blackKey : whiteKey;
+    }
+
+    public void Clear()
+    {
+        foreach (byte note in Enumerable.Range(21, 88))
+            SetKeyPressed(note, false);
     }
 
     // Update is called once per frame
