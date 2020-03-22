@@ -196,10 +196,13 @@ public class Sequencer : MonoBehaviour
     private void HandleKeyUp(byte note)
     {
         // after the tile is finished rendered disabled auto update to improve framerate
-        playingNotes[note].GetComponent<RoundedQuadMesh>().AutoUpdate = false;
+        if (playingNotes[note] != null)
+        {
+            playingNotes[note].GetComponent<RoundedQuadMesh>().AutoUpdate = false;
 
-        finishedNotes.Add(playingNotes[note]);
-        playingNotes[note] = null;
+            finishedNotes.Add(playingNotes[note]);
+            playingNotes[note] = null;
+        }
     }
 
     private float GetBPM(byte[] bytes)
