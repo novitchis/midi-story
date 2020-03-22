@@ -83,7 +83,7 @@ public class Sequencer : MonoBehaviour
             // octave line
             Instantiate(gridLine, new Vector3(-9 + offset, 1, -2), gridLine.transform.rotation);
             // second line
-            Instantiate(gridLine, new Vector3(-9 + offset + whiteKeyWidth * 3, 1, -2), gridLine.transform.rotation);
+            //Instantiate(gridLine, new Vector3(-9 + offset + whiteKeyWidth * 3, 1, -2), gridLine.transform.rotation);
             offset += whiteKeyWidth * 7; 
         }
         // one more line at the end
@@ -229,7 +229,7 @@ public class Sequencer : MonoBehaviour
         float whiteKeyWidth = width / totalWhiteKeys;
         float offsetX = whiteKeyWidth * precedingWhiteKeys;
 
-        //black keys need an offset
+        // black keys need an offset
         if (NoteUtils.IsBlackKey(note))
         {
             // there are the types of black keys left. middle, right
@@ -253,6 +253,11 @@ public class Sequencer : MonoBehaviour
             }
 
             y = 2;
+        }
+        else
+        {
+            // the white tile is smaller than the white key
+            offsetX += whiteKeyWidth / 10 * 0.75f;
         }
 
         return new Vector3(transform.position.x + offsetX, y, offsetZ);
