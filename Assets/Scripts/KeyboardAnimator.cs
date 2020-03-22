@@ -35,17 +35,4 @@ public class KeyboardAnimator : MonoBehaviour
         foreach (byte note in Enumerable.Range(21, 88))
             SetKeyPressed(note, false);
     }
-
-    // Update is called once per frame
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            SetKeyPressed(60, true);
-        }
-        else if (Input.GetKeyUp(KeyCode.Space))
-        {
-            SetKeyPressed(60, false);
-        }
-    }
 }

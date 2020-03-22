@@ -32,7 +32,7 @@ public class Sequencer : MonoBehaviour
     private int timerIndex = 0;
     private float time = 0;
 
-#if DEBUG
+//#if DEBUG
     private IEnumerator Start()
     {
         SpawnGridLines();
@@ -41,13 +41,13 @@ public class Sequencer : MonoBehaviour
         yield return new WaitForSeconds(1.0f);
         ResetAndPlay();
     }
-#else
-    void Start()
-    {
-        SpawnGridLines();
-        GetImage.GetImageFromUserAsync(gameObject.name, "ReceiveImage");
-    }
-#endif
+//#else
+//    void Start()
+//    {
+//        SpawnGridLines();
+//        GetImage.GetImageFromUserAsync(gameObject.name, "ReceiveImage");
+//    }
+//#endif
 
     // Update is called once per frame
     private void Update()
@@ -138,10 +138,7 @@ public class Sequencer : MonoBehaviour
         foreach (GameObject noteObject in playingNotes)
         {
             if (noteObject != null)
-            {
-                noteObject.transform.localScale += Vector3.forward * pointsDown;
-                noteObject.transform.Translate(Vector3.forward * pointsDown / 2);
-            }
+                noteObject.GetComponent<RoundedQuadMesh>().rect.height += pointsDown;
         }
 
         if (messages != null)
@@ -191,13 +188,16 @@ public class Sequencer : MonoBehaviour
         playingNotes[note] = Instantiate(
             NoteUtils.IsBlackKey(note) ? blackTile : whiteTile,
             GetNotePosition(note, offsetZ),
-            transform.rotation,
+            whiteTile.transform.rotation,
             transform
         );
     }
 
     private void HandleKeyUp(byte note)
     {
+        // after the tile is finished rendered disabled auto update to improve framerate
+        playingNotes[note].GetComponent<RoundedQuadMesh>().AutoUpdate = false;
+
         finishedNotes.Add(playingNotes[note]);
         playingNotes[note] = null;
     }
@@ -224,28 +224,29 @@ public class Sequencer : MonoBehaviour
         int totalWhiteKeys = 52;
 
         float whiteKeyWidth = width / totalWhiteKeys;
-        float offsetX = whiteKeyWidth * precedingWhiteKeys + whiteKeyWidth / 2;
+        float offsetX = whiteKeyWidth * precedingWhiteKeys;
 
         //black keys need an offset
         if (NoteUtils.IsBlackKey(note))
         {
             // there are the types of black keys left. middle, right
-
-            // middle between two white notes
-            offsetX -= whiteKeyWidth / 2;
-
             // note index in octave
             int noteIndex = note % 12;
 
             // left black key c#, f#
             if (noteIndex == 1 || noteIndex == 6)
             {
-                offsetX -= whiteKeyWidth / 10;
+                offsetX -= whiteKeyWidth / 10 * 3.5f;
             }
             else if (noteIndex == 3 || noteIndex == 10)
             {
                 // right black key d#, a#
-                offsetX += whiteKeyWidth / 10;
+                offsetX -= whiteKeyWidth / 10;
+            }
+            else
+            {
+                // middle between two white notes
+                offsetX -= whiteKeyWidth / 10 * 2f;
             }
 
             y = 2;

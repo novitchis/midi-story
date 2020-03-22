@@ -1213,7 +1213,6 @@ GameObject:
   - component: {fileID: 963194228}
   - component: {fileID: 963194227}
   - component: {fileID: 963194226}
-  - component: {fileID: 963194229}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -1286,18 +1285,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
---- !u!114 &963194229
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 963194225}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: db6bdd21366c58648829b3f8de48a866, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &975823440 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -927199367670048503, guid: 31c978f51187c5d45aa91099b3463efb,
@@ -1330,6 +1317,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1018416252}
   - component: {fileID: 1018416253}
+  - component: {fileID: 1018416254}
   m_Layer: 0
   m_Name: Sheet
   m_TagString: Untagged
@@ -1364,12 +1352,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   keyboard: {fileID: 975823441}
-  blackTile: {fileID: 6221661261016277510, guid: 5c8f2655d1cc9f44f8dff1dc4a4449a5,
+  blackTile: {fileID: 7709123559482651119, guid: b06e834a6f06e0f459e6e57cc236e045,
     type: 3}
-  whiteTile: {fileID: 6221661261016277510, guid: 7f21a24f86ec384419bd935a792ca40c,
+  whiteTile: {fileID: 1790987943119262076, guid: 70a60f1ab642f8548b2ad72210166590,
     type: 3}
   gridLine: {fileID: 5558780722626893604, guid: 1004c23cf15641d4b8f7b8cae6a22af0,
     type: 3}
   width: 18
   pointsPerSecond: 4
   sourceFile: {fileID: 4900000, guid: 9db374350eb3c824b86302b8bdf0489b, type: 3}
+--- !u!114 &1018416254
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1018416251}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7278130148b13b14b8e890f4323f668c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
