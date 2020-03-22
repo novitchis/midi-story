@@ -71,6 +71,29 @@ public class Sequencer : MonoBehaviour
 
             timerIndex++;
         }
+
+        foreach (Transform child in transform)
+        {
+            if (child.localPosition.z < pointsPerSecond * time)
+            {
+                RoundedQuadMesh quad = child.GetComponent<RoundedQuadMesh>();
+                if (quad.rect.height <= 0)
+                {
+                    Destroy(child.gameObject);
+                    continue;
+                }
+
+                quad.AutoUpdate = true;
+                quad.rect.height -= pointsPerSecond * deltaTime;
+                child.transform.position += Vector3.forward * (pointsPerSecond * deltaTime);
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        // TODO: we need to somehow remove objects 
     }
 
     private void SpawnGridLines()
@@ -219,7 +242,7 @@ public class Sequencer : MonoBehaviour
 
     private Vector3 GetNotePosition(byte note, float offsetZ)
     {
-        int y = 1;
+        float y = 0.1f;
         int precedingBlackKeys = (note / 12) * 5 + octaveBlackKeys[note % 12];
         
         // 12 is the white keys count not visible on the piano on bottom
@@ -252,7 +275,7 @@ public class Sequencer : MonoBehaviour
                 offsetX -= whiteKeyWidth / 10 * 2f;
             }
 
-            y = 2;
+            y = 0.2f;
         }
         else
         {
