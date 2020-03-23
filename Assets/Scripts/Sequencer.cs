@@ -32,22 +32,19 @@ public class Sequencer : MonoBehaviour
     private int timerIndex = 0;
     private float time = 0;
 
-//#if DEBUG
+#if DEBUG
     private IEnumerator Start()
     {
-        SpawnGridLines();
-
         midiFile = MidiFileLoader.Load(sourceFile.bytes);
         yield return new WaitForSeconds(1.0f);
         ResetAndPlay();
     }
-//#else
-//    void Start()
-//    {
-//        SpawnGridLines();
-//        GetImage.GetImageFromUserAsync(gameObject.name, "ReceiveImage");
-//    }
-//#endif
+#else
+    void Start()
+    {
+        GetImage.GetImageFromUserAsync(gameObject.name, "ReceiveImage");
+    }
+#endif
 
     // Update is called once per frame
     private void Update()
@@ -92,25 +89,6 @@ public class Sequencer : MonoBehaviour
                 break;
             }
         }
-
-        // TODO: we need to somehow remove objects 
-    }
-
-    private void SpawnGridLines()
-    {
-        float whiteKeyWidth = width / 52;
-        float offset = whiteKeyWidth * 2;
-
-        for (int index = 0; index < 7; index++)
-        {
-            // octave line
-            Instantiate(gridLine, new Vector3(-9 + offset, 1, -2), gridLine.transform.rotation);
-            // second line
-            //Instantiate(gridLine, new Vector3(-9 + offset + whiteKeyWidth * 3, 1, -2), gridLine.transform.rotation);
-            offset += whiteKeyWidth * 7; 
-        }
-        // one more line at the end
-        Instantiate(gridLine, new Vector3(-9 + offset, 1, -2), gridLine.transform.rotation);
     }
 
     private IEnumerator LoadMidiFile(byte[] fileBytes)
