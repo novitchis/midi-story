@@ -12,12 +12,20 @@ public class KeyboardAnimator : MonoBehaviour
     public Material blackKey;
     public Material whiteKey;
 
+    public float keyboardWidth;
+
+    public GameObject particlesSheet;
+    public GameObject particles;
+
+    private GameObject[] notesParticles = new GameObject[109];
+
     public void SetKeyPressed(byte note, bool pressed)
     {
         // first 21 notes are not visible on keyboard
         int childIndex = note - 20;
 
         this.transform.GetChild(childIndex).GetComponent<Renderer>().material = pressed ? GetPressedMaterial(note) : GetIddleMaterial(note);
+        SetHasParticles(note, pressed);
     }
 
     private Material GetPressedMaterial(byte note)
@@ -29,6 +37,26 @@ public class KeyboardAnimator : MonoBehaviour
     {
         return NoteUtils.IsBlackKey(note) ? blackKey : whiteKey;
     }
+
+    private void SetHasParticles(byte note, bool hasParticles)
+    {
+        if (hasParticles)
+        {
+            // TODO: fix bug: same key pressed is not adding particles
+            if (notesParticles[note] == null)
+            {
+                float x = particlesSheet.transform.position.x + NoteUtils.GetKeyX(note, keyboardWidth);
+                float y = particlesSheet.transform.position.y;
+                float z = particlesSheet.transform.position.z;
+                notesParticles[note] = Instantiate(particles, new Vector3(x,y,z), particlesSheet.transform.rotation, particlesSheet.transform);
+            }
+        }
+        else
+        {
+            Destroy(notesParticles[note]);
+        }
+    }
+
 
     public void Clear()
     {

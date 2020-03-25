@@ -23,10 +23,9 @@ public class Sequencer : MonoBehaviour
     private MidiFileContainer midiFile;
     private MidiSequencer sequencer = null;
 
-    private int[] octaveBlackKeys = new int[] { 0, 0, 1, 1, 2, 2, 2, 3, 3, 4, 4, 5 };
     private string[] notesNames = new string[] { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
 
-    private GameObject[] playingNotes = new GameObject[108];
+    private GameObject[] playingNotes = new GameObject[109];
     private List<GameObject> finishedNotes = new List<GameObject>();
     private List<KeyValuePair<float, MidiEvent>> timeToEvent = new List<KeyValuePair<float, MidiEvent>>();
     private int timerIndex = 0;
@@ -62,13 +61,18 @@ public class Sequencer : MonoBehaviour
         {
             MidiEvent midiEvent = timeToEvent[timerIndex].Value;
             if ((midiEvent.status & 0xf0) == 0x90 && midiEvent.data2 != 0)
+            {
                 keyboard.SetKeyPressed(midiEvent.data1, true);
+            }
             else if (((midiEvent.status & 0xf0) == 0x90 && midiEvent.data2 == 0) || (midiEvent.status & 0xf0) == 0x80)
+            {
                 keyboard.SetKeyPressed(midiEvent.data1, false);
+            }
 
             timerIndex++;
         }
 
+        // decrease the size of the tiles until it becomes 0 when it is removed
         foreach (Transform child in transform)
         {
             if (child.localPosition.z < pointsPerSecond * time)
@@ -220,48 +224,8 @@ public class Sequencer : MonoBehaviour
 
     private Vector3 GetNotePosition(byte note, float offsetZ)
     {
-        float y = 0.1f;
-        int precedingBlackKeys = (note / 12) * 5 + octaveBlackKeys[note % 12];
-        
-        // 12 is the white keys count not visible on the piano on bottom
-        int precedingWhiteKeys = note - precedingBlackKeys - 12;
-        int totalWhiteKeys = 52;
-
-        float whiteKeyWidth = width / totalWhiteKeys;
-        float offsetX = whiteKeyWidth * precedingWhiteKeys;
-
-        // black keys need an offset
-        if (NoteUtils.IsBlackKey(note))
-        {
-            // there are the types of black keys left. middle, right
-            // note index in octave
-            int noteIndex = note % 12;
-
-            // left black key c#, f#
-            if (noteIndex == 1 || noteIndex == 6)
-            {
-                offsetX -= whiteKeyWidth / 10 * 3.5f;
-            }
-            else if (noteIndex == 3 || noteIndex == 10)
-            {
-                // right black key d#, a#
-                offsetX -= whiteKeyWidth / 10;
-            }
-            else
-            {
-                // middle between two white notes
-                offsetX -= whiteKeyWidth / 10 * 2f;
-            }
-
-            y = 0.2f;
-        }
-        else
-        {
-            // the white tile is smaller than the white key
-            offsetX += whiteKeyWidth / 10 * 0.75f;
-        }
-
-        return new Vector3(transform.position.x + offsetX, y, offsetZ);
+        float y = NoteUtils.IsBlackKey(note) ? 0.2f : 0.1f;
+        return new Vector3(transform.position.x + NoteUtils.GetKeyX(note, width, true), y, offsetZ);
     }
 
     private void OnGUI()
