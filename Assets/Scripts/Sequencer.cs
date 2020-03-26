@@ -23,10 +23,7 @@ public class Sequencer : MonoBehaviour
     private MidiFileContainer midiFile;
     private MidiSequencer sequencer = null;
 
-    private string[] notesNames = new string[] { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
-
     private GameObject[] playingNotes = new GameObject[109];
-    private List<GameObject> finishedNotes = new List<GameObject>();
     private List<KeyValuePair<float, MidiEvent>> timeToEvent = new List<KeyValuePair<float, MidiEvent>>();
     private int timerIndex = 0;
     private float time = 0;
@@ -107,21 +104,15 @@ public class Sequencer : MonoBehaviour
         timerIndex = 0;
         timeToEvent.Clear();
         keyboard.Clear();
+        playingNotes = new GameObject[109];
 
-        finishedNotes.ForEach(Destroy);
-
-        int index = 0;
-        foreach (GameObject noteObject in playingNotes)
-        {
-            if (noteObject != null)
-            {
-                Destroy(noteObject);
-                playingNotes[index++] = null;
-            }
-        }
+        foreach (Transform child in transform)
+            Destroy(child.gameObject);
 
         // offset the position by the screen size to start notes falling from the top
         float totalTime = 8 / pointsPerSecond;
+
+        //TODO: this should not happen on restart
         sequencer = new MidiSequencer(midiFile.tracks, midiFile.division, 120);
         ApplyMessages(sequencer.Start(), 0, totalTime);
 
@@ -201,8 +192,6 @@ public class Sequencer : MonoBehaviour
         if (playingNotes[note] != null)
         {
             playingNotes[note].GetComponent<RoundedQuadMesh>().AutoUpdate = false;
-
-            finishedNotes.Add(playingNotes[note]);
             playingNotes[note] = null;
         }
     }
