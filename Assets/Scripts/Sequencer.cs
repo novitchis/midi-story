@@ -78,15 +78,12 @@ public class Sequencer : MonoBehaviour
             if (child.localPosition.z < pointsPerSecond * time)
             {
                 RoundedQuadMesh quad = child.GetComponent<RoundedQuadMesh>();
-                if (quad.rect.height <= 0)
-                {
-                    Destroy(child.gameObject);
-                    continue;
-                }
-
                 quad.AutoUpdate = true;
                 quad.rect.height -= pointsPerSecond * deltaTime;
                 child.transform.position += Vector3.forward * (pointsPerSecond * deltaTime);
+
+                if (quad.rect.height <= 0)
+                    Destroy(child.gameObject);
             }
             else
             {
