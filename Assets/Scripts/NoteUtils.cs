@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SmfLite;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -72,6 +73,15 @@ namespace Assets.Scripts
             }
 
             return offsetX;
+        }
+
+        public static bool IsNoteOn(MidiEvent midiEvent) {
+            return (midiEvent.status & 0xf0) == 0x90 && midiEvent.data2 != 0;
+        }
+
+        public static bool IsNoteOff(MidiEvent midiEvent)
+        {
+            return (midiEvent.status & 0xf0) == 0x90 && midiEvent.data2 == 0 || (midiEvent.status & 0xf0) == 0x80;
         }
     }
 }

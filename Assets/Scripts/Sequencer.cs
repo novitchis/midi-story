@@ -172,7 +172,7 @@ public class Sequencer : MonoBehaviour
                         timeToEvent.Add(new KeyValuePair<float, MidiEvent>(totalTime, midiEvent));
                     }
                 }
-            }
+            }   
         }        
     }
 

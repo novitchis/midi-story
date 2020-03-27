@@ -42,7 +42,6 @@ public class KeyboardAnimator : MonoBehaviour
     {
         if (hasParticles)
         {
-            // TODO: fix bug: same key pressed is not adding particles
             if (notesParticles[note] == null)
             {
                 float x = particlesSheet.transform.position.x + NoteUtils.GetKeyX(note, keyboardWidth);
@@ -54,6 +53,7 @@ public class KeyboardAnimator : MonoBehaviour
         else
         {
             Destroy(notesParticles[note]);
+            notesParticles[note] = null;
         }
     }
 
