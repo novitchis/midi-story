@@ -1714,6 +1714,8 @@ MonoBehaviour:
     type: 3}
   gridLine: {fileID: 5558780722626893604, guid: 1004c23cf15641d4b8f7b8cae6a22af0,
     type: 3}
+  playingWhiteTile: {fileID: 2100000, guid: 97f08062db5e60a41a957cf8b192037e, type: 2}
+  playingBlackTile: {fileID: 2100000, guid: 9f364128984a3b749a72cf04e1d28c10, type: 2}
   width: 18
   pointsPerSecond: 4
   sourceFile: {fileID: 4900000, guid: 9db374350eb3c824b86302b8bdf0489b, type: 3}

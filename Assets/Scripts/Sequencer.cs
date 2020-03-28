@@ -14,6 +14,8 @@ public class Sequencer : MonoBehaviour
     public GameObject blackTile;
     public GameObject whiteTile;
     public GameObject gridLine;
+    public Material playingWhiteTile;
+    public Material playingBlackTile;
 
     public float width;
     public float pointsPerSecond = 4;
@@ -74,6 +76,9 @@ public class Sequencer : MonoBehaviour
         {
             if (child.localPosition.z < pointsPerSecond * time)
             {
+                if (child.gameObject.GetComponent<Renderer>().material != playingWhiteTile)
+                    child.gameObject.GetComponent<Renderer>().material = playingWhiteTile;
+
                 RoundedQuadMesh quad = child.GetComponent<RoundedQuadMesh>();
                 quad.AutoUpdate = true;
                 quad.rect.height -= pointsPerSecond * deltaTime;

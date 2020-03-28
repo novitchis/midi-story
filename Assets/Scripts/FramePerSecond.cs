@@ -14,6 +14,7 @@ public class FramePerSecond : MonoBehaviour
         fpsRect = new Rect(70, 100, 400, 100);
         style = new GUIStyle();
         style.fontSize = 30;
+        style.normal.textColor = Color.white;
         StartCoroutine(RecalculateFPS());
     }
 

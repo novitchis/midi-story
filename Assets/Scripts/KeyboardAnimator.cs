@@ -25,7 +25,7 @@ public class KeyboardAnimator : MonoBehaviour
         int childIndex = note - 20;
 
         this.transform.GetChild(childIndex).GetComponent<Renderer>().material = pressed ? GetPressedMaterial(note) : GetIddleMaterial(note);
-        SetHasParticles(note, pressed);
+        //SetHasParticles(note, pressed);
     }
 
     private Material GetPressedMaterial(byte note)
