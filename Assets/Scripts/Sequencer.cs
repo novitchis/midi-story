@@ -52,7 +52,7 @@ public class Sequencer : MonoBehaviour
 
     private void AdvancePlayer(float deltaTime)
     {
-        transform.Translate(Vector3.back * pointsPerSecond * deltaTime);
+        transform.Translate(Vector3.down * pointsPerSecond * deltaTime);
 
         // execute events on keyboard
         time += deltaTime;
@@ -74,7 +74,7 @@ public class Sequencer : MonoBehaviour
         // decrease the size of the tiles until it becomes 0 when it is removed
         foreach (Transform child in transform)
         {
-            if (child.localPosition.z < pointsPerSecond * time)
+            if (child.localPosition.y < pointsPerSecond * time)
             {
                 if (child.gameObject.GetComponent<Renderer>().material != playingWhiteTile)
                     child.gameObject.GetComponent<Renderer>().material = playingWhiteTile;
@@ -82,7 +82,7 @@ public class Sequencer : MonoBehaviour
                 RoundedQuadMesh quad = child.GetComponent<RoundedQuadMesh>();
                 quad.AutoUpdate = true;
                 quad.rect.height -= pointsPerSecond * deltaTime;
-                child.transform.position += Vector3.forward * (pointsPerSecond * deltaTime);
+                child.transform.position += Vector3.up * (pointsPerSecond * deltaTime);
 
                 if (quad.rect.height <= 0)
                     Destroy(child.gameObject);
@@ -103,7 +103,7 @@ public class Sequencer : MonoBehaviour
 
     private void ResetAndPlay()
     {
-        transform.position = new Vector3(transform.position.x, transform.position.y, 0);
+        transform.position = new Vector3(transform.position.x, 0, transform.position.z);
 
         time = 0;
         timerIndex = 0;
@@ -131,7 +131,7 @@ public class Sequencer : MonoBehaviour
     private void ApplyMessages(List<IMidiEvent> messages, float deltaTime, float totalTime)
     {
         float pointsDown = pointsPerSecond * deltaTime;
-        float offsetZ = pointsPerSecond * totalTime;
+        float offsetY = pointsPerSecond * totalTime;
 
         foreach (GameObject noteObject in playingNotes)
         {
@@ -161,7 +161,7 @@ public class Sequencer : MonoBehaviour
                             continue;
 
                         if (midiEvent.data2 != 0)
-                            HandleKeyDown(midiEvent.data1, offsetZ);
+                            HandleKeyDown(midiEvent.data1, offsetY);
                         else
                             HandleKeyUp(midiEvent.data1);
 
@@ -181,12 +181,15 @@ public class Sequencer : MonoBehaviour
         }        
     }
 
-    private void HandleKeyDown(byte note, float offsetZ)
+    private void HandleKeyDown(byte note, float offsetY)
     {
+        float z = NoteUtils.IsBlackKey(note) ? 0.2f : 0.1f;
+        Vector3 notePosition = new Vector3(transform.position.x + NoteUtils.GetKeyX(note, width, true), offsetY, transform.position.z - z);
+
         playingNotes[note] = Instantiate(
             NoteUtils.IsBlackKey(note) ? blackTile : whiteTile,
-            GetNotePosition(note, offsetZ),
-            whiteTile.transform.rotation,
+            notePosition,
+            Quaternion.identity,
             transform
         );
     }
@@ -211,12 +214,6 @@ public class Sequencer : MonoBehaviour
         }
 
         return 60 * (1000000f / microsecondsPerQuarterNote);
-    }
-
-    private Vector3 GetNotePosition(byte note, float offsetZ)
-    {
-        float y = NoteUtils.IsBlackKey(note) ? 0.2f : 0.1f;
-        return new Vector3(transform.position.x + NoteUtils.GetKeyX(note, width, true), y, offsetZ);
     }
 
     private void OnGUI()
