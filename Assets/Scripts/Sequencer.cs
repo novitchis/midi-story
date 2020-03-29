@@ -9,6 +9,7 @@ using Assets.Scripts;
 
 public class Sequencer : MonoBehaviour
 {
+    public Playback playback;
     public KeyboardAnimator keyboard;
 
     public GameObject blackTile;
@@ -30,15 +31,16 @@ public class Sequencer : MonoBehaviour
     private int timerIndex = 0;
     private float time = 0;
 
-    private bool isPlaying = false;
     private bool mouseDownExecuted = false;
+
+    public bool IsPlaying { get; private set; }
 
 #if DEBUG
     private IEnumerator Start()
     {
         midiFile = MidiFileLoader.Load(sourceFile.bytes);
         yield return new WaitForSeconds(1.0f);
-        ResetAndPlay();
+        ResetPlayer();
     }
 #else
     void Start()
@@ -50,17 +52,21 @@ public class Sequencer : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
-        if (isPlaying)
+        if (IsPlaying)
             AdvancePlayer(Time.deltaTime);
 
         if (!mouseDownExecuted && Input.GetMouseButtonDown(0))
         {
             mouseDownExecuted = true;
-            SetIsPlaying(!isPlaying);
         }
         else if (mouseDownExecuted && Input.GetMouseButtonUp(0))
         {
             mouseDownExecuted = false;
+            SetIsPlaying(!IsPlaying);
+            if (IsPlaying)
+                playback.Hide();
+            else
+                playback.Show();
         }
     }
 
@@ -122,26 +128,31 @@ public class Sequencer : MonoBehaviour
     {
         midiFile = MidiFileLoader.Load(fileBytes);
         yield return new WaitForSeconds(1.0f);
-        ResetAndPlay();
+        ResetPlayer();
     }
 
-    private void ResetAndPlay()
+    private void SetIsPlaying(bool isPlaying)
+    {
+        IsPlaying = isPlaying;
+    }
+
+    public void GoToStart()
     {
         transform.position = new Vector3(transform.position.x, 0, transform.position.z);
 
         time = 0;
         timerIndex = 0;
-        timeToEvent.Clear();
         keyboard.Clear();
         playingNotes = new GameObject[109];
 
         foreach (Transform child in transform)
             Destroy(child.gameObject);
 
+        timeToEvent.Clear();
+
         // offset the position by the screen size to start notes falling from the top
         float totalTime = 8 / pointsPerSecond;
 
-        //TODO: this should not happen on restart
         sequencer = new MidiSequencer(midiFile.tracks, midiFile.division, 120);
         ApplyMessages(sequencer.Start(), 0, totalTime);
 
@@ -151,12 +162,20 @@ public class Sequencer : MonoBehaviour
             ApplyMessages(sequencer.Advance(0.05f), 0.05f, totalTime);
         }
 
+        // reset this flag to not duplciate the mouse clicks
+        mouseDownExecuted = false;
+
         SetIsPlaying(true);
     }
 
-    private void SetIsPlaying(bool isPlaying)
+    public void ResetPlayer()
     {
-        this.isPlaying = isPlaying;
+#if DEBUG
+        GoToStart();
+#else
+        SetIsPlaying(false);
+        GetImage.GetImageFromUserAsync(gameObject.name, "ReceiveImage");
+#endif
     }
 
     private void ApplyMessages(List<IMidiEvent> messages, float deltaTime, float totalTime)
@@ -245,14 +264,6 @@ public class Sequencer : MonoBehaviour
         }
 
         return 60 * (1000000f / microsecondsPerQuarterNote);
-    }
-
-    private void OnGUI()
-    {
-        if (GUI.Button(new Rect(10, 10, 150, 50), "Restart"))
-        {
-            ResetAndPlay();
-        }
     }
 
     public void ReceiveImage(string dataUrl)

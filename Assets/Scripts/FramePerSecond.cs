@@ -11,9 +11,9 @@ public class FramePerSecond : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        fpsRect = new Rect(70, 100, 400, 100);
+        fpsRect = new Rect(10, 10, 100, 100);
         style = new GUIStyle();
-        style.fontSize = 30;
+        style.fontSize = 14;
         style.normal.textColor = Color.white;
         StartCoroutine(RecalculateFPS());
     }
