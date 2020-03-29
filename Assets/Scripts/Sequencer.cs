@@ -76,11 +76,15 @@ public class Sequencer : MonoBehaviour
         {
             if (child.localPosition.y < pointsPerSecond * time)
             {
-                if (child.gameObject.GetComponent<Renderer>().material != playingWhiteTile)
-                    child.gameObject.GetComponent<Renderer>().material = playingWhiteTile;
-
                 RoundedQuadMesh quad = child.GetComponent<RoundedQuadMesh>();
-                quad.AutoUpdate = true;
+
+                if (quad.AutoUpdate == false)
+                {
+                    // TODO: this can be done better
+                    child.gameObject.GetComponent<Renderer>().material = child.gameObject.name.Contains(blackTile.name) ? playingBlackTile : playingWhiteTile;
+                    quad.AutoUpdate = true;
+                }
+
                 quad.rect.height -= pointsPerSecond * deltaTime;
                 child.transform.position += Vector3.up * (pointsPerSecond * deltaTime);
 
