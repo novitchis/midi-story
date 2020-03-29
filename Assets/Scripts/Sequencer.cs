@@ -30,6 +30,9 @@ public class Sequencer : MonoBehaviour
     private int timerIndex = 0;
     private float time = 0;
 
+    private bool isPlaying = false;
+    private bool mouseDownExecuted = false;
+
 #if DEBUG
     private IEnumerator Start()
     {
@@ -47,11 +50,28 @@ public class Sequencer : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
-        AdvancePlayer(Time.deltaTime);
+        if (isPlaying)
+            AdvancePlayer(Time.deltaTime);
+
+        if (!mouseDownExecuted && Input.GetMouseButtonDown(0))
+        {
+            mouseDownExecuted = true;
+            SetIsPlaying(!isPlaying);
+        }
+        else if (mouseDownExecuted && Input.GetMouseButtonUp(0))
+        {
+            mouseDownExecuted = false;
+        }
     }
 
     private void AdvancePlayer(float deltaTime)
     {
+        if (time > timeToEvent.Last().Key)
+        {
+            SetIsPlaying(false);
+            return;
+        }
+
         transform.Translate(Vector3.down * pointsPerSecond * deltaTime);
 
         // execute events on keyboard
@@ -130,6 +150,13 @@ public class Sequencer : MonoBehaviour
             totalTime += 0.05f;
             ApplyMessages(sequencer.Advance(0.05f), 0.05f, totalTime);
         }
+
+        SetIsPlaying(true);
+    }
+
+    private void SetIsPlaying(bool isPlaying)
+    {
+        this.isPlaying = isPlaying;
     }
 
     private void ApplyMessages(List<IMidiEvent> messages, float deltaTime, float totalTime)
