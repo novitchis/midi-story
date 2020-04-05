@@ -31,4 +31,9 @@ public class FramePerSecond : MonoBehaviour
     {
         GUI.Label(fpsRect, string.Format("FPS: {0:0.0}", fps), style);
     }
+
+    public void Colorize(float r)
+    {
+        style.normal.textColor = new Color(r, 0, 0);
+    }
 }

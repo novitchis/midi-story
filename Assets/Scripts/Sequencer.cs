@@ -42,11 +42,6 @@ public class Sequencer : MonoBehaviour
         yield return new WaitForSeconds(1.0f);
         ResetPlayer();
     }
-#else
-    void Start()
-    {
-        GetImage.GetImageFromUserAsync(gameObject.name, "ReceiveImage");
-    }
 #endif
 
     // Update is called once per frame
@@ -128,7 +123,7 @@ public class Sequencer : MonoBehaviour
     {
         midiFile = MidiFileLoader.Load(fileBytes);
         yield return new WaitForSeconds(1.0f);
-        ResetPlayer();
+        GoToStart();
     }
 
     private void SetIsPlaying(bool isPlaying)
@@ -170,12 +165,7 @@ public class Sequencer : MonoBehaviour
 
     public void ResetPlayer()
     {
-#if DEBUG
         GoToStart();
-#else
-        SetIsPlaying(false);
-        GetImage.GetImageFromUserAsync(gameObject.name, "ReceiveImage");
-#endif
     }
 
     private void ApplyMessages(List<IMidiEvent> messages, float deltaTime, float totalTime)
@@ -266,7 +256,7 @@ public class Sequencer : MonoBehaviour
         return 60 * (1000000f / microsecondsPerQuarterNote);
     }
 
-    public void ReceiveImage(string dataUrl)
+    public void ReceiveFile(string dataUrl)
     {
         StartCoroutine(LoadBlob(dataUrl));
     }
