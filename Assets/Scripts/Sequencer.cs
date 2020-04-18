@@ -124,9 +124,22 @@ public class Sequencer : MonoBehaviour
         ResetPlayer();
     }
 
+    public void Play()
+    {
+        SetPlayerState(PlayerState.Playing);
+    }
+
+    public void Pause()
+    {
+        SetPlayerState(PlayerState.Paused);
+    }
+
     private void SetPlayerState(PlayerState playerState)
     {
         PlayerState = playerState;
+
+        if (playerState == PlayerState.Finished)
+            PlaybackNotifier.SendFinished();
     }
 
     public void GoToStart()
