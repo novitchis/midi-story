@@ -11,5 +11,9 @@ mergeInto(LibraryManager.library, {
     // which is exposed by the library to the window.
 
     ReactUnityWebGL.Finished();
+  },
+
+  FileLoaded: function() {
+    ReactUnityWebGL.FileLoaded();
   }
 });

@@ -122,6 +122,7 @@ public class Sequencer : MonoBehaviour
         midiFile = MidiFileLoader.Load(fileBytes);
         yield return new WaitForSeconds(1.0f);
         ResetPlayer();
+        PlaybackNotifier.SendFileLoaded();
     }
 
     public void Play()

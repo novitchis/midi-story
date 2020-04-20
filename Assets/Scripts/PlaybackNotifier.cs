@@ -8,6 +8,9 @@ public class PlaybackNotifier
 #if UNITY_WEBGL
         [DllImport("__Internal")]
         private static extern void Finished();
+
+        [DllImport("__Internal")]
+        private static extern void FileLoaded();
 #endif
 
     // Then create a function that is going to trigger
@@ -17,6 +20,16 @@ public class PlaybackNotifier
     {
 #if UNITY_WEBGL
         Finished();
+#else
+            Debug.LogError("Not implemented in this platform");
+#endif
+
+    }
+
+    public static void SendFileLoaded()
+    {
+#if UNITY_WEBGL
+        FileLoaded();
 #else
             Debug.LogError("Not implemented in this platform");
 #endif
