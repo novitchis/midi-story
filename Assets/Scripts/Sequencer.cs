@@ -26,7 +26,8 @@ public class Sequencer : MonoBehaviour
     private MidiSequencer sequencer = null;
 
     private GameObject[] playingNotes = new GameObject[109];
-    private List<KeyValuePair<float, MidiEvent>> timeToEvent = new List<KeyValuePair<float, MidiEvent>>();
+    private List<NoteTileInfo> allNotes = new List<NoteTileInfo>();
+    private int activationNoteIndex = 0;
     private int timerIndex = 0;
     private float time = 0;
 
@@ -65,19 +66,28 @@ public class Sequencer : MonoBehaviour
 
     private void AdvancePlayer(float deltaTime)
     {
-        if (time > timeToEvent.Last().Key)
+        if (allNotes.Count == 0 || time > allNotes.Last().Time)
         {
             SetPlayerState(PlayerState.Finished);
             return;
+        }
+
+        // Tiles become activated when are aproaching screen bounds to improve rendering
+        while (allNotes.Count > activationNoteIndex && allNotes[activationNoteIndex].Time <= time + 3)
+        {
+            if (allNotes[activationNoteIndex].GameObject != null)
+                allNotes[activationNoteIndex].GameObject.SetActive(true);
+
+            activationNoteIndex++;
         }
 
         transform.Translate(Vector3.down * pointsPerSecond * deltaTime);
 
         // execute events on keyboard
         time += deltaTime;
-        while (timeToEvent.Count > timerIndex && timeToEvent[timerIndex].Key <= time)
+        while (allNotes.Count > timerIndex && allNotes[timerIndex].Time <= time)
         {
-            MidiEvent midiEvent = timeToEvent[timerIndex].Value;
+            MidiEvent midiEvent = allNotes[timerIndex].Event;
             if ((midiEvent.status & 0xf0) == 0x90 && midiEvent.data2 != 0)
             {
                 keyboard.SetKeyPressed(midiEvent.data1, true);
@@ -155,13 +165,14 @@ public class Sequencer : MonoBehaviour
 
         time = 0;
         timerIndex = 0;
+        activationNoteIndex = 0;
         keyboard.Clear();
         playingNotes = new GameObject[109];
 
         foreach (Transform child in transform)
             Destroy(child.gameObject);
 
-        timeToEvent.Clear();
+        allNotes.Clear();
 
         // offset the position by the screen size to start notes falling from the top
         float totalTime = 8 / pointsPerSecond + 1;
@@ -211,12 +222,13 @@ public class Sequencer : MonoBehaviour
                         if (midiEvent.data1 < 21 || midiEvent.data1 > 108)
                             continue;
 
+                        GameObject gameObject = null;
                         if (midiEvent.data2 != 0)
-                            HandleKeyDown(midiEvent.data1, offsetY);
+                            gameObject = HandleKeyDown(midiEvent.data1, offsetY);
                         else
                             HandleKeyUp(midiEvent.data1);
 
-                        timeToEvent.Add(new KeyValuePair<float, MidiEvent>(totalTime, midiEvent));
+                        allNotes.Add(new NoteTileInfo { Time = totalTime, Event = midiEvent, GameObject = gameObject });
                     }
                     else if ((midiEvent.status & 0xf0) == 0x80)
                     {
@@ -225,14 +237,14 @@ public class Sequencer : MonoBehaviour
                             continue;
 
                         HandleKeyUp(midiEvent.data1);
-                        timeToEvent.Add(new KeyValuePair<float, MidiEvent>(totalTime, midiEvent));
+                        allNotes.Add(new NoteTileInfo { Time = totalTime, Event = midiEvent, GameObject = null });
                     }
                 }
             }   
         }        
     }
 
-    private void HandleKeyDown(byte note, float offsetY)
+    private GameObject HandleKeyDown(byte note, float offsetY)
     {
         float z = NoteUtils.IsBlackKey(note) ? 0.2f : 0.1f;
         Vector3 notePosition = new Vector3(transform.position.x + NoteUtils.GetKeyX(note, width, true), offsetY, transform.position.z - z);
@@ -243,6 +255,10 @@ public class Sequencer : MonoBehaviour
             Quaternion.identity,
             transform
         );
+
+        playingNotes[note].SetActive(false);
+
+        return playingNotes[note];
     }
 
     private void HandleKeyUp(byte note)
@@ -290,4 +306,13 @@ public enum PlayerState
     Paused,
     Playing,
     Finished,
+}
+
+public class NoteTileInfo
+{
+    public float Time { get; set; }
+
+    public MidiEvent Event { get; set; }
+
+    public GameObject GameObject { get; set; }
 }
