@@ -58,7 +58,7 @@ MonoBehaviour:
     height: -0.04
   Scale: 1
   CornerVertexCount: 8
-  CreateUV: 0
+  CreateUV: 1
   FlipBackFaceUV: 0
   DoubleSided: 0
   AutoUpdate: 1
@@ -80,7 +80,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 99e04d4ad71258044945bd2954146e32, type: 2}
+  - {fileID: 2100000, guid: 97f08062db5e60a41a957cf8b192037e, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

@@ -13,9 +13,6 @@ public class Sequencer : MonoBehaviour
 
     public GameObject blackTile;
     public GameObject whiteTile;
-    public GameObject gridLine;
-    public Material playingWhiteTile;
-    public Material playingBlackTile;
 
     public float width;
     public float pointsPerSecond = 4;
@@ -76,7 +73,10 @@ public class Sequencer : MonoBehaviour
         while (allNotes.Count > activationNoteIndex && allNotes[activationNoteIndex].Time <= time + 3)
         {
             if (allNotes[activationNoteIndex].GameObject != null)
+            {
                 allNotes[activationNoteIndex].GameObject.SetActive(true);
+                allNotes[activationNoteIndex].GameObject.hideFlags = HideFlags.None;
+            }
 
             activationNoteIndex++;
         }
@@ -98,32 +98,6 @@ public class Sequencer : MonoBehaviour
             }
 
             timerIndex++;
-        }
-
-        // decrease the size of the tiles until it becomes 0 when it is removed
-        foreach (Transform child in transform)
-        {
-            if (child.localPosition.y < pointsPerSecond * time)
-            {
-                RoundedQuadMesh quad = child.GetComponent<RoundedQuadMesh>();
-
-                if (quad.AutoUpdate == false)
-                {
-                    // TODO: this can be done better
-                    child.gameObject.GetComponent<Renderer>().material = child.gameObject.name.Contains(blackTile.name) ? playingBlackTile : playingWhiteTile;
-                    quad.AutoUpdate = true;
-                }
-
-                quad.rect.height -= pointsPerSecond * deltaTime;
-                child.transform.position += Vector3.up * (pointsPerSecond * deltaTime);
-
-                if (quad.rect.height <= 0)
-                    Destroy(child.gameObject);
-            }
-            else
-            {
-                break;
-            }
         }
     }
 
@@ -257,6 +231,7 @@ public class Sequencer : MonoBehaviour
         );
 
         playingNotes[note].SetActive(false);
+        playingNotes[note].hideFlags = HideFlags.HideInHierarchy;
 
         return playingNotes[note];
     }
