@@ -32,7 +32,7 @@ public class Sequencer : MonoBehaviour
 
     public PlayerState PlayerState { get; private set; }
 
-#if DEBUG
+#if !UNITY_WEBGL
     private IEnumerator Start()
     {
         midiFile = MidiFileLoader.Load(sourceFile.bytes);

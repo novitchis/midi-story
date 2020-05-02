@@ -11,11 +11,13 @@ public class FramePerSecond : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+#if DEBUG
         fpsRect = new Rect(10, 10, 100, 100);
         style = new GUIStyle();
         style.fontSize = 14;
         style.normal.textColor = Color.white;
         StartCoroutine(RecalculateFPS());
+#endif
     }
 
     private IEnumerator RecalculateFPS()
@@ -29,11 +31,8 @@ public class FramePerSecond : MonoBehaviour
 
     private void OnGUI()
     {
+#if DEBUG
         GUI.Label(fpsRect, string.Format("FPS: {0:0.0}", fps), style);
-    }
-
-    public void Colorize(float r)
-    {
-        style.normal.textColor = new Color(r, 0, 0);
+#endif
     }
 }
