@@ -16,4 +16,8 @@ mergeInto(LibraryManager.library, {
   FileLoaded: function() {
     ReactUnityWebGL.FileLoaded();
   }
+  
+  ImageCaptured: function(name, pngBytes) {
+    ReactUnityWebGL.ImageCaptured(name, pngBytes);
+  }
 });
