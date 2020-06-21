@@ -6,6 +6,7 @@ using System;
 using UnityEngine.Networking;
 using System.Linq;
 using Assets.Scripts;
+using System.Runtime.Serialization;
 
 public class Sequencer : MonoBehaviour
 {
@@ -32,12 +33,14 @@ public class Sequencer : MonoBehaviour
 
     public PlayerState PlayerState { get; private set; }
 
-#if !UNITY_WEBGL
+#if !UNITY_WEBGL || UNITY_EDITOR
     private IEnumerator Start()
     {
         midiFile = MidiFileLoader.Load(sourceFile.bytes);
         yield return new WaitForSeconds(1.0f);
         ResetPlayer();
+
+        PlaybackNotifier.SendFileLoaded(new FileInfo() { name = "", length = (int)allNotes.Last().Time });
     }
 #endif
 
@@ -106,7 +109,8 @@ public class Sequencer : MonoBehaviour
         midiFile = MidiFileLoader.Load(fileBytes);
         yield return new WaitForSeconds(1.0f);
         ResetPlayer();
-        PlaybackNotifier.SendFileLoaded();
+
+        PlaybackNotifier.SendFileLoaded(new FileInfo() { name = "", length = (int)allNotes.Last().Time });
     }
 
     public void Play()
@@ -290,4 +294,14 @@ public class NoteTileInfo
     public MidiEvent Event { get; set; }
 
     public GameObject GameObject { get; set; }
+}
+
+[DataContract]
+public class FileInfo
+{
+    [DataMember(Name = "name")]
+    public string name = null;
+
+    [DataMember(Name = "length")]
+    public int length = 0;
 }
