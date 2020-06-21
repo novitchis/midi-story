@@ -6,15 +6,15 @@ public class PlaybackNotifier
 {
     // Import the JSLib as following. Make sure the
     // names match with the JSLib file we've just created.
-#if UNITY_WEBGL
+#if UNITY_WEBGL && !UNITY_EDITOR
         [DllImport("__Internal")]
         private static extern void Finished();
 
         [DllImport("__Internal")]
-        private static extern void FileLoaded();
+        private static extern void FileLoaded(string fileInfo);
 
         [DllImport("__Internal")]
-        private static extern void ImageCaptured(string name, byte[] pngBytes);
+        private static extern void ImageCaptured(string name);
 #endif
 
     // Then create a function that is going to trigger
@@ -22,31 +22,30 @@ public class PlaybackNotifier
 
     public static void SendFinished()
     {
-#if UNITY_WEBGL
+#if UNITY_WEBGL && !UNITY_EDITOR
         Finished();
 #else
-            Debug.LogError("Not implemented in this platform");
+        Debug.LogWarning("Not implemented in this platform");
 #endif
 
     }
 
-    public static void SendFileLoaded()
+    public static void SendFileLoaded(FileInfo fileInfo)
     {
-#if UNITY_WEBGL
-        FileLoaded();
+#if UNITY_WEBGL && !UNITY_EDITOR
+        FileLoaded(JsonUtility.ToJson(fileInfo));
 #else
-            Debug.LogError("Not implemented in this platform");
+        Debug.LogWarning("Not implemented in this platform: SendFileLoaded " + JsonUtility.ToJson(fileInfo));
 #endif
 
     }
 
-    public static void ImageCaptured(string name, byte[] pngBytes)
+    public static void SendImageCaptured(string name)
     {
-#if UNITY_WEBGL
-        ImageCaptured(name, pngBytes);
+#if UNITY_WEBGL && !UNITY_EDITOR
+        ImageCaptured(name);
 #else
-        string path = string.Format(@"C:\Users\silviun\Desktop\Screenshots\{0}", name);
-        File.WriteAllBytes(path, pngBytes);
+        Debug.LogWarning("Not implemented in this platform");
 #endif
     }
 }

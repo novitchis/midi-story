@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,30 +20,43 @@ public class ExportCaptures: MonoBehaviour
         sequencer.GoToStart();
         Time.captureFramerate = 60;
 
+        if (Directory.Exists("working"))
+            Directory.Delete("working", true);
+
+        Directory.CreateDirectory("working");
+
         isCapturing = true;
     }
 
     public void StopCapturing()
     {
         Time.captureFramerate = 0;
+        sequencer.Pause();
+
         isCapturing = false;
     }
 
     private void Update()
     {
-        if (isCapturing && sequencer.PlayerState == PlayerState.Playing)
+        if (isCapturing)
         {
-            string name = string.Format("img{0:D05}.png", frame++);
+            if (sequencer.PlayerState == PlayerState.Playing)
+            {
+                string name = string.Format("./working/img{0:D05}.png", frame++);
+                ScreenCapture.CaptureScreenshot(name);
 
-            // Capture the screenshot to the specified file.
-            Texture2D texture = ScreenCapture.CaptureScreenshotAsTexture();
-            byte[] pngBytes = texture.EncodeToPNG();
-
-            PlaybackNotifier.ImageCaptured(name, pngBytes);
+                PlaybackNotifier.SendImageCaptured(name);
+            }
+            else if (sequencer.PlayerState == PlayerState.Finished)
+            {
+                // sending null tells the client there is nothing more to export
+                PlaybackNotifier.SendImageCaptured(null);
+                StopCapturing();
+            }
         }
     }
 
-#if !UNITY_WEBGL
+#if !UNITY_WEBGL || UNITY_EDITOR
     void OnGUI()
     {
         if (sequencer.PlayerState == PlayerState.Playing)

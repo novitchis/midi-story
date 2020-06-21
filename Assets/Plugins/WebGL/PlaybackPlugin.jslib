@@ -13,11 +13,11 @@ mergeInto(LibraryManager.library, {
     ReactUnityWebGL.Finished();
   },
 
-  FileLoaded: function() {
-    ReactUnityWebGL.FileLoaded();
-  }
+  FileLoaded: function(fileInfo) {
+    ReactUnityWebGL.FileLoaded(JSON.parse(Pointer_stringify(fileInfo)));
+  },
   
-  ImageCaptured: function(name, pngBytes) {
-    ReactUnityWebGL.ImageCaptured(name, pngBytes);
-  }
+  ImageCaptured: function(name) {
+    ReactUnityWebGL.ImageCaptured([Pointer_stringify(name), FS]);
+  },
 });
