@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 6955647656600149518}
   - component: {fileID: 114305856614250350}
   - component: {fileID: 996671255129000583}
+  - component: {fileID: -6587731353975131330}
   m_Layer: 0
   m_Name: WhiteTile
   m_TagString: Untagged
@@ -101,3 +102,15 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+--- !u!114 &-6587731353975131330
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1790987943119262076}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b41e0085693d76648bca8526cfd88e8c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
