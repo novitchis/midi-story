@@ -5,7 +5,6 @@ using UnityEngine;
 public class TileAnimation : MonoBehaviour
 {
     private Material material = null;
-    private float distance = 0.0f;
 
     // Start is called before the first frame update
     void Start()
@@ -17,9 +16,7 @@ public class TileAnimation : MonoBehaviour
     void Update()
     {
         if (this.transform.position.y < 0) {
-            distance = Mathf.Min(distance + Time.deltaTime * 2, 0.2f);
-
-            material.SetFloat("Vector1_8C03E553", distance);
+            material.SetFloat("Vector1_8C03E553", 0.3f);
         }
     }
 }
