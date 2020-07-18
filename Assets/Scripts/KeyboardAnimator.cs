@@ -38,24 +38,24 @@ public class KeyboardAnimator : MonoBehaviour
         return NoteUtils.IsBlackKey(note) ? blackKey : whiteKey;
     }
 
-    private void SetHasParticles(byte note, bool hasParticles)
-    {
-        if (hasParticles)
-        {
-            if (notesParticles[note] == null)
-            {
-                float x = particlesSheet.transform.position.x + NoteUtils.GetKeyX(note, keyboardWidth);
-                float y = particlesSheet.transform.position.y;
-                float z = particlesSheet.transform.position.z;
-                notesParticles[note] = Instantiate(particles, new Vector3(x,y,z), particlesSheet.transform.rotation, particlesSheet.transform);
-            }
-        }
-        else
-        {
-            Destroy(notesParticles[note]);
-            notesParticles[note] = null;
-        }
-    }
+    //private void SetHasParticles(byte note, bool hasParticles)
+    //{
+    //    if (hasParticles)
+    //    {
+    //        if (notesParticles[note] == null)
+    //        {
+    //            float x = particlesSheet.transform.position.x + NoteUtils.GetKeyX(note, keyboardWidth);
+    //            float y = particlesSheet.transform.position.y;
+    //            float z = particlesSheet.transform.position.z;
+    //            notesParticles[note] = Instantiate(particles, new Vector3(x,y,z), particlesSheet.transform.rotation, particlesSheet.transform);
+    //        }
+    //    }
+    //    else
+    //    {
+    //        Destroy(notesParticles[note]);
+    //        notesParticles[note] = null;
+    //    }
+    //}
 
 
     public void Clear()

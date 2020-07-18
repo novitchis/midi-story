@@ -168,7 +168,7 @@ public class Sequencer : MonoBehaviour
         mouseDownExecuted = false;
     }
 
-    private void ApplyMessages(List<IMidiEvent> messages, float deltaTime, float totalTime)
+    private void ApplyMessages(List<List<IMidiEvent>> messageTracks, float deltaTime, float totalTime)
     {
         float pointsDown = pointsPerSecond * deltaTime;
         float offsetY = pointsPerSecond * totalTime;
@@ -179,47 +179,55 @@ public class Sequencer : MonoBehaviour
                 noteObject.GetComponent<RoundedQuadMesh>().rect.height += pointsDown;
         }
 
-        if (messages != null)
+        if (messageTracks != null)
         {
-            foreach (var message in messages)
+            for (int trackIndex = 0; trackIndex < messageTracks.Count; trackIndex++)
             {
-                if (message is MidiMetaEvent)
+                foreach (var message in messageTracks[trackIndex])
                 {
-                    MidiMetaEvent midiMetaEvent = (MidiMetaEvent)message;
-
-                    // set tempo event
-                    if (midiMetaEvent.type == 0x51)
-                        sequencer.SetBPM(GetBPM(midiMetaEvent.bytes));
-                }
-                else if (message is MidiEvent)
-                {
-                    MidiEvent midiEvent = (MidiEvent)message;
-                    if ((midiEvent.status & 0xf0) == 0x90)
+                    if (message is MidiMetaEvent)
                     {
-                        // the range of keys visible on keyboard is: 21 - 108
-                        if (midiEvent.data1 < 21 || midiEvent.data1 > 108)
-                            continue;
+                        MidiMetaEvent midiMetaEvent = (MidiMetaEvent)message;
 
-                        GameObject gameObject = null;
-                        if (midiEvent.data2 != 0)
-                            gameObject = HandleKeyDown(midiEvent.data1, offsetY);
-                        else
+                        // set tempo event
+                        if (midiMetaEvent.type == 0x51)
+                            sequencer.SetBPM(GetBPM(midiMetaEvent.bytes));
+                    }
+                    else if (message is MidiEvent)
+                    {
+                        MidiEvent midiEvent = (MidiEvent)message;
+                        if ((midiEvent.status & 0xf0) == 0x90)
+                        {
+                            // the range of keys visible on keyboard is: 21 - 108
+                            if (midiEvent.data1 < 21 || midiEvent.data1 > 108)
+                                continue;
+
+                            GameObject gameObject = null;
+                            if (midiEvent.data2 != 0)
+                                gameObject = HandleKeyDown(midiEvent.data1, offsetY);
+                            else
+                                HandleKeyUp(midiEvent.data1);
+
+                            NoteTileInfo noteTileInfo = new NoteTileInfo { Time = totalTime, Event = midiEvent, GameObject = gameObject, TrackIndex = trackIndex };
+                            if (gameObject)
+                                gameObject.GetComponent<TileAnimation>().NoteTileInfo = noteTileInfo;
+
+                            allNotes.Add(noteTileInfo);
+                        }
+                        else if ((midiEvent.status & 0xf0) == 0x80)
+                        {
+                            // the range of keys visible on keyboard is: 21 - 108
+                            if (midiEvent.data1 < 21 || midiEvent.data1 > 108)
+                                continue;
+
                             HandleKeyUp(midiEvent.data1);
-
-                        allNotes.Add(new NoteTileInfo { Time = totalTime, Event = midiEvent, GameObject = gameObject });
-                    }
-                    else if ((midiEvent.status & 0xf0) == 0x80)
-                    {
-                        // the range of keys visible on keyboard is: 21 - 108
-                        if (midiEvent.data1 < 21 || midiEvent.data1 > 108)
-                            continue;
-
-                        HandleKeyUp(midiEvent.data1);
-                        allNotes.Add(new NoteTileInfo { Time = totalTime, Event = midiEvent, GameObject = null });
+                            allNotes.Add(new NoteTileInfo { Time = totalTime, Event = midiEvent, GameObject = null, TrackIndex = trackIndex });
+                        }
                     }
                 }
-            }   
-        }        
+            }
+            
+        }
     }
 
     private GameObject HandleKeyDown(byte note, float offsetY)
@@ -294,6 +302,8 @@ public class NoteTileInfo
     public MidiEvent Event { get; set; }
 
     public GameObject GameObject { get; set; }
+
+    public int TrackIndex { get; set; }
 }
 
 [DataContract]

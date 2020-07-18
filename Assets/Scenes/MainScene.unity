@@ -1740,6 +1740,7 @@ GameObject:
   - component: {fileID: 1018416253}
   - component: {fileID: 1018416254}
   - component: {fileID: 1018416255}
+  - component: {fileID: 1018416256}
   m_Layer: 0
   m_Name: Sheet
   m_TagString: Untagged
@@ -1832,6 +1833,22 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+--- !u!114 &1018416256
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1018416251}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 48b691eaa1ef6104ea0774a26476b437, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  LeftColor: '#00A8E8'
+  RightColor: '#00A8E8'
+  BlackTileMaterial: {fileID: 2100000, guid: 9f364128984a3b749a72cf04e1d28c10, type: 2}
+  WhiteTileMaterial: {fileID: 2100000, guid: 97f08062db5e60a41a957cf8b192037e, type: 2}
 --- !u!1 &1063805686
 GameObject:
   m_ObjectHideFlags: 0
