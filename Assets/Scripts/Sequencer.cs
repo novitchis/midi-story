@@ -93,11 +93,11 @@ public class Sequencer : MonoBehaviour
             MidiEvent midiEvent = allNotes[timerIndex].Event;
             if ((midiEvent.status & 0xf0) == 0x90 && midiEvent.data2 != 0)
             {
-                keyboard.SetKeyPressed(midiEvent.data1, true);
+                keyboard.SetKeyPressed(midiEvent.data1, allNotes[timerIndex].TrackIndex);
             }
             else if (((midiEvent.status & 0xf0) == 0x90 && midiEvent.data2 == 0) || (midiEvent.status & 0xf0) == 0x80)
             {
-                keyboard.SetKeyPressed(midiEvent.data1, false);
+                keyboard.SetKeyDepressed(midiEvent.data1);
             }
 
             timerIndex++;

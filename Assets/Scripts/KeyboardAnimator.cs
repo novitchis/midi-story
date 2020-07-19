@@ -19,18 +19,27 @@ public class KeyboardAnimator : MonoBehaviour
 
     private GameObject[] notesParticles = new GameObject[109];
 
-    public void SetKeyPressed(byte note, bool pressed)
+    private StyleManager styleManager = null;
+
+    void Start()
+    {
+        styleManager = GameObject.Find("Sheet").GetComponent<StyleManager>();
+    }
+
+    public void SetKeyPressed(byte note, int trackIndex)
     {
         // first 21 notes are not visible on keyboard
         int childIndex = note - 20;
 
-        this.transform.GetChild(childIndex).GetComponent<Renderer>().material = pressed ? GetPressedMaterial(note) : GetIddleMaterial(note);
-        //SetHasParticles(note, pressed);
+        this.transform.GetChild(childIndex).GetComponent<Renderer>().material = styleManager.GetKeyMaterial(trackIndex, NoteUtils.IsBlackKey(note));
     }
 
-    private Material GetPressedMaterial(byte note)
+    public void SetKeyDepressed(byte note)
     {
-        return NoteUtils.IsBlackKey(note) ? pressedBlackKey : pressedWhiteKey;
+        // first 21 notes are not visible on keyboard
+        int childIndex = note - 20;
+
+        this.transform.GetChild(childIndex).GetComponent<Renderer>().material = GetIddleMaterial(note);
     }
 
     private Material GetIddleMaterial(byte note)
@@ -38,29 +47,9 @@ public class KeyboardAnimator : MonoBehaviour
         return NoteUtils.IsBlackKey(note) ? blackKey : whiteKey;
     }
 
-    //private void SetHasParticles(byte note, bool hasParticles)
-    //{
-    //    if (hasParticles)
-    //    {
-    //        if (notesParticles[note] == null)
-    //        {
-    //            float x = particlesSheet.transform.position.x + NoteUtils.GetKeyX(note, keyboardWidth);
-    //            float y = particlesSheet.transform.position.y;
-    //            float z = particlesSheet.transform.position.z;
-    //            notesParticles[note] = Instantiate(particles, new Vector3(x,y,z), particlesSheet.transform.rotation, particlesSheet.transform);
-    //        }
-    //    }
-    //    else
-    //    {
-    //        Destroy(notesParticles[note]);
-    //        notesParticles[note] = null;
-    //    }
-    //}
-
-
     public void Clear()
     {
         foreach (byte note in Enumerable.Range(21, 88))
-            SetKeyPressed(note, false);
+            SetKeyDepressed(note);
     }
 }

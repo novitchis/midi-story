@@ -11,27 +11,45 @@ public class StyleManager : MonoBehaviour
     public List<string> TrackColors = new List<string> { "#00A8E8" };
 
     public Material WhiteTileMaterial;
+    public Material WhiteKeyMaterial;
 
-    private List<Material> TrackMaterials { get; set; }
+    private List<Material> trackTileMaterials { get; set; }
+
+    private List<Material> trackKeyMaterials { get; set; }
 
     void Start()
     {
-        TrackMaterials = new List<Material>();
+        trackTileMaterials = new List<Material>();
+        trackKeyMaterials = new List<Material>();
 
         TrackColors.ForEach(colorValue =>
         {
             Color color = new Color();
             ColorUtility.TryParseHtmlString(colorValue, out color);
-            Material trackMaterial = new Material(WhiteTileMaterial);
-            trackMaterial.SetColor("Color_613449CD", color);
 
-            TrackMaterials.Add(trackMaterial);
+            Material trackTileMaterial = new Material(WhiteTileMaterial);
+            trackTileMaterial.SetColor("Color_613449CD", color);
+            trackTileMaterials.Add(trackTileMaterial);
+
+            Material trackKeyMaterial = new Material(WhiteKeyMaterial);
+            trackKeyMaterial.SetColor("Color_613449CD", color);
+            trackKeyMaterials.Add(trackKeyMaterial);
+
         });
     }
 
     public Material GetTileMaterial(int trackIndex, bool isBlackKey)
     {
-        Material material = new Material(trackIndex < TrackMaterials.Count ? TrackMaterials[trackIndex] : TrackMaterials.Last());
+        Material material = new Material(trackIndex < trackTileMaterials.Count ? trackTileMaterials[trackIndex] : trackTileMaterials.Last());
+        if (isBlackKey)
+            material.SetInt("Boolean_B1539AEC", 1);
+
+        return material;
+    }
+
+    public Material GetKeyMaterial(int trackIndex, bool isBlackKey)
+    {
+        Material material = new Material(trackIndex < trackKeyMaterials.Count ? trackKeyMaterials[trackIndex] : trackKeyMaterials.Last());
         if (isBlackKey)
             material.SetInt("Boolean_B1539AEC", 1);
 
