@@ -28,9 +28,10 @@ public class KeyboardAnimator : MonoBehaviour
 
     public void SetKeyPressed(byte note, int trackIndex)
     {
+        //TODO: Add style change for existing keys
+
         // first 21 notes are not visible on keyboard
         int childIndex = note - 20;
-
         this.transform.GetChild(childIndex).GetComponent<Renderer>().material = styleManager.GetKeyMaterial(trackIndex, NoteUtils.IsBlackKey(note));
     }
 

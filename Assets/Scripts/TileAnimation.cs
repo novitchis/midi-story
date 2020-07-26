@@ -7,7 +7,7 @@ using UnityEngine;
 public class TileAnimation : MonoBehaviour
 {
     private Material material = null;
-
+    private StyleManager styleManager = null;
     public NoteTileInfo NoteTileInfo { get; set; }
 
     // Start is called before the first frame update
@@ -16,8 +16,16 @@ public class TileAnimation : MonoBehaviour
         if (NoteTileInfo == null)
             throw new System.Exception("NoteTileInfo property is mandatory.");
 
-        StyleManager styleManager = GameObject.Find("Sheet").GetComponent<StyleManager>();
+        styleManager = GameObject.Find("Sheet").GetComponent<StyleManager>();
+        styleManager.StyleChanged += (o, s) => {
+            UpdateMaterial();
+        };
 
+        UpdateMaterial();
+    }
+
+    private void UpdateMaterial()
+    {
         material = styleManager.GetTileMaterial(NoteTileInfo.TrackIndex, NoteUtils.IsBlackKey(NoteTileInfo.Event.data1));
         this.GetComponent<Renderer>().material = material;
     }

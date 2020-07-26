@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: WhiteTile
+  m_Name: PlayingWhiteKey
   m_Shader: {fileID: -6465566751694194690, guid: f3e76487cee32ca44aef546975a0d108,
     type: 3}
   m_ShaderKeywords: 

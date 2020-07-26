@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: PlayingWhiteTile
-  m_Shader: {fileID: -6465566751694194690, guid: f3e76487cee32ca44aef546975a0d108,
+  m_Shader: {fileID: -6465566751694194690, guid: af119419cee27f64a9aeb27a481c9d21,
     type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
@@ -21,6 +21,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs: []
     m_Floats:
+    - Boolean_B1539AEC: 0
     - Vector1_4CF2A8ED: 0.2
     - Vector1_66E535A7: 0.5
     - Vector1_8C03E553: 0

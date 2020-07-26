@@ -1849,7 +1849,7 @@ MonoBehaviour:
   - '#00FFE8'
   - '#00A8E8'
   WhiteTileMaterial: {fileID: 2100000, guid: 97f08062db5e60a41a957cf8b192037e, type: 2}
-  WhiteKeyMaterial: {fileID: 0}
+  WhiteKeyMaterial: {fileID: 2100000, guid: 99e04d4ad71258044945bd2954146e32, type: 2}
 --- !u!1 &1063805686
 GameObject:
   m_ObjectHideFlags: 0

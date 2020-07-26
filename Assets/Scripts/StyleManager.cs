@@ -17,7 +17,14 @@ public class StyleManager : MonoBehaviour
 
     private List<Material> trackKeyMaterials { get; set; }
 
+    public event EventHandler StyleChanged;
+
     void Start()
+    {
+        UpdateStyle();
+    }
+
+    private void UpdateStyle()
     {
         trackTileMaterials = new List<Material>();
         trackKeyMaterials = new List<Material>();
@@ -34,9 +41,9 @@ public class StyleManager : MonoBehaviour
             Material trackKeyMaterial = new Material(WhiteKeyMaterial);
             trackKeyMaterial.SetColor("Color_613449CD", color);
             trackKeyMaterials.Add(trackKeyMaterial);
-
         });
     }
+
 
     public Material GetTileMaterial(int trackIndex, bool isBlackKey)
     {
@@ -54,5 +61,19 @@ public class StyleManager : MonoBehaviour
             material.SetInt("Boolean_B1539AEC", 1);
 
         return material;
+    }
+
+    public void LoadStyle(string styleJson)
+    {
+        StyleSettings style = JsonUtility.FromJson<StyleSettings>(styleJson);
+        TrackColors = style.trackColors;
+        UpdateStyle();
+        RaiseStyleChanged();
+    }
+
+    private void RaiseStyleChanged()
+    {
+        if (StyleChanged != null)
+            StyleChanged(this, EventArgs.Empty);
     }
 }

@@ -1,21 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Assets.Scripts.Styles
 {
+    [DataContract]
     public class StyleSettings
     {
-        public string LeftColor { get; set; }
-
-        public string RightColor { get; set; }
+        [DataMember(Name = "trackColors")]
+        public List<string> trackColors = null;
 
         public StyleSettings()
         {
-            LeftColor = "#00A8E8";
-            RightColor = "#00A8E8";
+            trackColors = new List<string> { "#00A8E8" };
         }
     }
 }
