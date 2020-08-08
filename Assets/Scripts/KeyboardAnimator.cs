@@ -30,13 +30,18 @@ public class KeyboardAnimator : MonoBehaviour
     private void OnStyleChanged(object sender, System.EventArgs e)
     {
         foreach (var pressedKeyInfo in pressedKeysTracks)
-            SetKeyPressed(pressedKeyInfo.Key, pressedKeyInfo.Value);
+            UpdateMaterial(pressedKeyInfo.Key, pressedKeyInfo.Value);
     }
 
     public void SetKeyPressed(byte note, int trackIndex)
     {
         pressedKeysTracks[note] = trackIndex;
 
+        UpdateMaterial(note, trackIndex);
+    }
+
+    private void UpdateMaterial(byte note, int trackIndex)
+    {
         // first 21 notes are not visible on keyboard
         int childIndex = note - 20;
         this.transform.GetChild(childIndex).GetComponent<Renderer>().material = styleManager.GetKeyMaterial(trackIndex, NoteUtils.IsBlackKey(note));

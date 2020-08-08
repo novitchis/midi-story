@@ -98,6 +98,7 @@ public class Sequencer : MonoBehaviour
             else if (((midiEvent.status & 0xf0) == 0x90 && midiEvent.data2 == 0) || (midiEvent.status & 0xf0) == 0x80)
             {
                 keyboard.SetKeyDepressed(midiEvent.data1);
+                Destroy(allNotes[timerIndex].GameObject);
             }
 
             timerIndex++;
@@ -206,10 +207,10 @@ public class Sequencer : MonoBehaviour
                             if (midiEvent.data2 != 0)
                                 gameObject = HandleKeyDown(midiEvent.data1, offsetY);
                             else
-                                HandleKeyUp(midiEvent.data1);
+                                gameObject = HandleKeyUp(midiEvent.data1);
 
                             NoteTileInfo noteTileInfo = new NoteTileInfo { Time = totalTime, Event = midiEvent, GameObject = gameObject, TrackIndex = trackIndex };
-                            if (gameObject)
+                            if (gameObject != null)
                                 gameObject.GetComponent<TileAnimation>().NoteTileInfo = noteTileInfo;
 
                             allNotes.Add(noteTileInfo);
@@ -220,8 +221,8 @@ public class Sequencer : MonoBehaviour
                             if (midiEvent.data1 < 21 || midiEvent.data1 > 108)
                                 continue;
 
-                            HandleKeyUp(midiEvent.data1);
-                            allNotes.Add(new NoteTileInfo { Time = totalTime, Event = midiEvent, GameObject = null, TrackIndex = trackIndex });
+                            GameObject gameObject = HandleKeyUp(midiEvent.data1);
+                            allNotes.Add(new NoteTileInfo { Time = totalTime, Event = midiEvent, GameObject = gameObject, TrackIndex = trackIndex });
                         }
                     }
                 }
@@ -248,14 +249,18 @@ public class Sequencer : MonoBehaviour
         return playingNotes[note];
     }
 
-    private void HandleKeyUp(byte note)
+    private GameObject HandleKeyUp(byte note)
     {
         // after the tile is finished rendered disabled auto update to improve framerate
         if (playingNotes[note] != null)
         {
+            GameObject result = playingNotes[note].gameObject;
             playingNotes[note].GetComponent<RoundedQuadMesh>().AutoUpdate = false;
             playingNotes[note] = null;
+            return result;
         }
+
+        return null;
     }
 
     private float GetBPM(byte[] bytes)

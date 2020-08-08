@@ -10,6 +10,8 @@ public class TileAnimation : MonoBehaviour
     private StyleManager styleManager = null;
     public NoteTileInfo NoteTileInfo { get; set; }
 
+    private bool currentlyPressed = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -17,10 +19,13 @@ public class TileAnimation : MonoBehaviour
             throw new System.Exception("NoteTileInfo property is mandatory.");
 
         styleManager = GameObject.Find("Sheet").GetComponent<StyleManager>();
-        styleManager.StyleChanged += (o, s) => {
-            UpdateMaterial();
-        };
+        styleManager.StyleChanged += OnStyleChanged;
 
+        UpdateMaterial();
+    }
+
+    private void OnStyleChanged(object sender, System.EventArgs e)
+    {
         UpdateMaterial();
     }
 
@@ -33,8 +38,16 @@ public class TileAnimation : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (this.transform.position.y < 0) {
+        if (!currentlyPressed && this.transform.position.y < 0) 
+        {
+            currentlyPressed = true;
             material.SetFloat("Vector1_8C03E553", 0.3f);
         }
+    }
+
+    private void OnDestroy()
+    {
+        if (styleManager != null)
+            styleManager.StyleChanged -= OnStyleChanged;
     }
 }
