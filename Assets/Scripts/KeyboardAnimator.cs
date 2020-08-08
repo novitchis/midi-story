@@ -17,18 +17,25 @@ public class KeyboardAnimator : MonoBehaviour
     public GameObject particlesSheet;
     public GameObject particles;
 
-    private GameObject[] notesParticles = new GameObject[109];
-
     private StyleManager styleManager = null;
+
+    private Dictionary<byte, int> pressedKeysTracks = new Dictionary<byte, int>(160);
 
     void Start()
     {
         styleManager = GameObject.Find("Sheet").GetComponent<StyleManager>();
+        styleManager.StyleChanged += OnStyleChanged;
+    }
+
+    private void OnStyleChanged(object sender, System.EventArgs e)
+    {
+        foreach (var pressedKeyInfo in pressedKeysTracks)
+            SetKeyPressed(pressedKeyInfo.Key, pressedKeyInfo.Value);
     }
 
     public void SetKeyPressed(byte note, int trackIndex)
     {
-        //TODO: Add style change for existing keys
+        pressedKeysTracks[note] = trackIndex;
 
         // first 21 notes are not visible on keyboard
         int childIndex = note - 20;
@@ -37,6 +44,8 @@ public class KeyboardAnimator : MonoBehaviour
 
     public void SetKeyDepressed(byte note)
     {
+        pressedKeysTracks.Remove(note);
+
         // first 21 notes are not visible on keyboard
         int childIndex = note - 20;
 
