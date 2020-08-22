@@ -7,6 +7,7 @@ using UnityEngine.Networking;
 using System.Linq;
 using Assets.Scripts;
 using System.Runtime.Serialization;
+using static SmfLite.MidiTrack;
 
 public class Sequencer : MonoBehaviour
 {
@@ -24,6 +25,7 @@ public class Sequencer : MonoBehaviour
     private MidiSequencer sequencer = null;
 
     private GameObject[] playingNotes = new GameObject[109];
+
     private List<NoteTileInfo> allNotes = new List<NoteTileInfo>();
     private int activationNoteIndex = 0;
     private int timerIndex = 0;
@@ -40,7 +42,7 @@ public class Sequencer : MonoBehaviour
         yield return new WaitForSeconds(1.0f);
         ResetPlayer();
 
-        PlaybackNotifier.SendFileLoaded(new FileInfo() { name = "", length = (int)allNotes.Last().Time });
+        PlaybackNotifier.SendFileLoaded(GetFileInfo());
     }
 #endif
 
@@ -111,7 +113,7 @@ public class Sequencer : MonoBehaviour
         yield return new WaitForSeconds(1.0f);
         ResetPlayer();
 
-        PlaybackNotifier.SendFileLoaded(new FileInfo() { name = "", length = (int)allNotes.Last().Time });
+        PlaybackNotifier.SendFileLoaded(GetFileInfo());
     }
 
     public void Play()
@@ -157,6 +159,7 @@ public class Sequencer : MonoBehaviour
         float totalTime = 8 / pointsPerSecond + 1;
 
         sequencer = new MidiSequencer(midiFile.tracks, midiFile.division, 120);
+
         ApplyMessages(sequencer.Start(), 0, totalTime);
 
         while (sequencer.Playing)
@@ -167,6 +170,32 @@ public class Sequencer : MonoBehaviour
 
         // reset this flag to not duplciate the mouse clicks
         mouseDownExecuted = false;
+    }
+
+    private FileInfo GetFileInfo()
+    {
+        return new FileInfo() {
+            length = (int)allNotes.Last().Time,
+            tracks = midiFile.tracks.Select((midiTrack, trackIndex) => {
+                TrackInfo result = new TrackInfo()
+                {
+                    name = "Track " + trackIndex,
+                    index = trackIndex,
+                };
+
+                foreach (DeltaEventPair eventDelta in midiTrack)
+                {
+                    if (eventDelta.midiEvent is MidiEvent && NoteUtils.IsNoteOn((MidiEvent)eventDelta.midiEvent))
+                    {
+                        result.hasNotes = true;
+                        break;
+                    }
+                }
+
+                return result;
+
+            }).ToList(),
+        };
     }
 
     private void ApplyMessages(List<List<IMidiEvent>> messageTracks, float deltaTime, float totalTime)
@@ -319,4 +348,16 @@ public class FileInfo
 
     [DataMember(Name = "length")]
     public int length = 0;
+
+    [DataMember(Name = "tracks")]
+    public List<TrackInfo> tracks = new List<TrackInfo>();
+}
+
+public class TrackInfo
+{
+    public string name = null;
+
+    public int index = 0;
+
+    public bool hasNotes = false;
 }
