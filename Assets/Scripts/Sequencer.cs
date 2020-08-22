@@ -340,19 +340,17 @@ public class NoteTileInfo
     public int TrackIndex { get; set; }
 }
 
-[DataContract]
+[Serializable]
 public class FileInfo
 {
-    [DataMember(Name = "name")]
     public string name = null;
 
-    [DataMember(Name = "length")]
     public int length = 0;
 
-    [DataMember(Name = "tracks")]
     public List<TrackInfo> tracks = new List<TrackInfo>();
 }
 
+[Serializable]
 public class TrackInfo
 {
     public string name = null;
