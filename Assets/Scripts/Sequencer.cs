@@ -213,8 +213,13 @@ public class Sequencer : MonoBehaviour
         {
             for (int trackIndex = 0; trackIndex < messageTracks.Count; trackIndex++)
             {
-                foreach (var message in messageTracks[trackIndex])
+                if (messageTracks[trackIndex] == null)
+                    continue;
+
+                foreach (IMidiEvent message in messageTracks[trackIndex])
                 {
+
+
                     if (message is MidiMetaEvent)
                     {
                         MidiMetaEvent midiMetaEvent = (MidiMetaEvent)message;

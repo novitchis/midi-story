@@ -7,15 +7,20 @@ using System.Threading.Tasks;
 
 namespace Assets.Scripts.Styles
 {
-    [DataContract]
+    [Serializable]
     public class StyleSettings
     {
-        [DataMember(Name = "trackColors")]
-        public List<string> trackColors = null;
+        public List<TrackStyle> tracks = null;
 
         public StyleSettings()
         {
-            trackColors = new List<string> { "#00A8E8" };
+            tracks = new List<TrackStyle> { };
         }
+    }
+    
+    [Serializable]
+    public class TrackStyle
+    {
+        public string color = "#00A8E8";
     }
 }

@@ -22,8 +22,7 @@ namespace SmfLite
         public List<List<IMidiEvent>> Start ()
         {
             return trackSequencers
-                .Select(item => item.Start())
-                .Where(item => item != null).ToList();
+                .Select(item => item.Start()).ToList();
         }
 
         /// <summary>
@@ -36,8 +35,7 @@ namespace SmfLite
             }
 
             return trackSequencers
-                .Select(item => item.Advance(deltaTime))
-                .Where(item => item != null).ToList();
+                .Select(item => item.Advance(deltaTime)).ToList();
         }
 
         public void SetBPM(float bpm)

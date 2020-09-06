@@ -8,7 +8,7 @@ using UnityEngine;
 
 public class StyleManager : MonoBehaviour
 {
-    public List<string> TrackColors = new List<string> { "#00A8E8" };
+    public List<TrackStyle> TracksStyles = new List<TrackStyle> {new TrackStyle() };
 
     public Material WhiteTileMaterial;
     public Material WhiteKeyMaterial;
@@ -29,10 +29,10 @@ public class StyleManager : MonoBehaviour
         trackTileMaterials = new List<Material>();
         trackKeyMaterials = new List<Material>();
 
-        TrackColors.ForEach(colorValue =>
+        TracksStyles.ForEach(trackStyle =>
         {
             Color color = new Color();
-            ColorUtility.TryParseHtmlString(colorValue, out color);
+            ColorUtility.TryParseHtmlString(trackStyle.color, out color);
 
             Material trackTileMaterial = new Material(WhiteTileMaterial);
             trackTileMaterial.SetColor("Color_613449CD", color);
@@ -66,7 +66,7 @@ public class StyleManager : MonoBehaviour
     public void LoadStyle(string styleJson)
     {
         StyleSettings style = JsonUtility.FromJson<StyleSettings>(styleJson);
-        TrackColors = style.trackColors;
+        TracksStyles = style.tracks;
         UpdateStyle();
         RaiseStyleChanged();
     }
